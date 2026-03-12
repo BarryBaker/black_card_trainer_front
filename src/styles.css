@@ -1,0 +1,247 @@
+:root {
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #f4efe4;
+  background:
+    radial-gradient(circle at top, rgba(241, 163, 74, 0.24), transparent 28%),
+    linear-gradient(145deg, #08141d 0%, #112a36 48%, #1d120a 100%);
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --panel: rgba(7, 16, 25, 0.78);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --accent: #f1a34a;
+  --accent-strong: #ffca76;
+  --muted: #a8b5c1;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+select {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 56px;
+}
+
+.hero-panel {
+  padding: 24px 0 12px;
+}
+
+.hero-panel h1 {
+  margin: 0;
+  font-size: clamp(2.8rem, 8vw, 5.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.hero-copy,
+.section-copy,
+.card-caption {
+  color: var(--muted);
+  max-width: 60ch;
+}
+
+.eyebrow,
+.section-kicker,
+.metric-label {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.74rem;
+  color: var(--accent-strong);
+}
+
+.panel {
+  margin-top: 28px;
+  padding: 24px;
+  border: 1px solid var(--panel-border);
+  border-radius: 28px;
+  background: var(--panel);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: start;
+}
+
+.panel-heading h2 {
+  margin: 4px 0 0;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+}
+
+.filter-grid,
+.trainer-layout {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.filter-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.trainer-layout {
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.field-card,
+.trainer-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.field-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.field-card span {
+  font-size: 0.92rem;
+  color: #dbe2ea;
+}
+
+.field-card select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  color: #f8f3e9;
+  background: rgba(4, 11, 18, 0.88);
+}
+
+.request-preview,
+.trainer-card {
+  margin-top: 24px;
+  padding: 18px;
+}
+
+.request-preview {
+  border-radius: 22px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+pre {
+  margin: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #d7e0e8;
+}
+
+.primary-action,
+.secondary-action {
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+
+.primary-action:hover,
+.secondary-action:hover {
+  transform: translateY(-1px);
+  opacity: 0.96;
+}
+
+.primary-action {
+  margin-top: 24px;
+  padding: 14px 22px;
+  background: linear-gradient(135deg, var(--accent) 0%, #d8782d 100%);
+  color: #120e09;
+  font-weight: 700;
+}
+
+.secondary-action {
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8f3e9;
+}
+
+.trainer-card {
+  grid-column: span 4;
+}
+
+.trainer-card.spotlight,
+.trainer-card.wide {
+  grid-column: span 6;
+}
+
+.metric-value {
+  margin: 6px 0 0;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-weight: 700;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.card-chip {
+  min-width: 56px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  text-align: center;
+  font-weight: 700;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+}
+
+.board-chip {
+  color: var(--accent-strong);
+}
+
+@media (max-width: 860px) {
+  .panel-heading {
+    flex-direction: column;
+  }
+
+  .trainer-card,
+  .trainer-card.spotlight,
+  .trainer-card.wide {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    width: min(100% - 20px, 1120px);
+    padding-top: 18px;
+  }
+
+  .panel {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .hero-panel h1 {
+    line-height: 1;
+  }
+}
