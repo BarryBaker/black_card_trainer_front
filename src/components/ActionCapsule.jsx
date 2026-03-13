@@ -96,8 +96,7 @@ function ActionCapsule({ actions, label = '' }) {
         />
       ))}
       {label ? <div style={styles.label}>{label}</div> : null}
-    </div>
-  );
+    </div>);
 }
 
 export default ActionCapsule;

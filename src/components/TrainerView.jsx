@@ -79,6 +79,7 @@ const styles = {
     height: '750px',
     overflowY: 'auto',
     overflowX: 'hidden',
+     background: 'rgba(255, 255, 255, 0.03)',
   },
   previousNodeWrap: {
     margin: '0 0 14px',
@@ -187,7 +188,7 @@ function TrainerView({
           <ScoreCapsule score={score} />
         </div>
         <div style={styles.splitPaneTree}>
-          <Tree nodes={tree?.tree} overall_actions={tree?.overall_actions} />
+          <Tree nodes={tree?.tree} />
         </div>
       </div>
     </section>
