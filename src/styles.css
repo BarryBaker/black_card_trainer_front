@@ -45,7 +45,7 @@ select {
 }
 
 .hero-panel {
-  padding: 24px 0 12px;
+  /* padding: 24px 0 12px; */
 }
 
 .hero-panel h1 {
@@ -160,7 +160,9 @@ pre {
   border: 0;
   border-radius: 999px;
   cursor: pointer;
-  transition: transform 140ms ease, opacity 140ms ease;
+  transition:
+    transform 140ms ease,
+    opacity 140ms ease;
 }
 
 .primary-action:hover,

@@ -2,7 +2,7 @@ const fieldOptions = {
   pot: ['SRP', '3BP'],
   stack: ['50bb', '100bb'],
   street: ['Flop', 'Turn'],
-}
+};
 
 const positionOptionsByScenario = {
   'SRP:100bb:Flop': [
@@ -14,10 +14,10 @@ const positionOptionsByScenario = {
     ['CO', 'BTN'],
     ['EP', 'BTN'],
   ],
-   'SRP:100bb:Turn': [
+  'SRP:100bb:Turn': [
     ['BTN', 'BB'],
     ['MP', 'BB'],
-   
+
     ['SB', 'BB'],
     ['CO', 'BTN'],
     ['EP', 'BTN'],
@@ -32,31 +32,31 @@ const positionOptionsByScenario = {
     ['MP', 'SB'],
     ['SB', 'BB'],
   ],
-   '3BP:100bb:Turn': [
+  '3BP:100bb:Turn': [
     ['BTN', 'SB'],
     ['CO', 'BTN'],
-   
+
     ['CO', 'SB'],
     ['EP', 'CO'],
     ['MP', 'SB'],
     ['SB', 'BB'],
   ],
-}
+};
 
 function buildLineOptionsUrl() {
-  const baseUrl = import.meta.env.VITE_BASE_URL?.replace(/\/$/, '') ?? ''
-  return `${baseUrl}/api/db/lines`
+  const baseUrl = import.meta.env.VITE_BASE_URL?.replace(/\/$/, '') ?? '';
+  return `${baseUrl}/api/db/lines`;
 }
 
 function buildScenarioKey(pot, stack, street) {
-  return `${pot}:${stack}:${street}`
+  return `${pot}:${stack}:${street}`;
 }
 
 const fieldLabels = {
   pot: 'Pot',
   stack: 'Stack',
   street: 'Street',
-}
+};
 
 const styles = {
   panel: {
@@ -214,7 +214,7 @@ const styles = {
     opacity: 0.55,
     boxShadow: 'none',
   },
-}
+};
 
 function TaskFilters({
   pot,
@@ -233,10 +233,10 @@ function TaskFilters({
   onLinesChange,
   onGenerateTask,
   isGeneratingTask = false,
-  setActiveView
+  setActiveView,
 }) {
-  const positionOptions = positionOptionsByScenario[buildScenarioKey(pot, stack, street)] ?? []
-  const canGenerateTask = positions.length > 0 && Boolean(hero)
+  const positionOptions = positionOptionsByScenario[buildScenarioKey(pot, stack, street)] ?? [];
+  const canGenerateTask = positions.length > 0 && Boolean(hero);
 
   const filters = {
     Pot: pot,
@@ -245,13 +245,13 @@ function TaskFilters({
     Positions: positions,
     Hero: hero,
     Lines: lines,
-  }
+  };
 
   async function handleScenarioSeatClick(scenario, selectedHero) {
-    onPositionsChange(scenario)
-    onHeroChange(selectedHero)
-    onLinesChange([])
-    
+    onPositionsChange(scenario);
+    onHeroChange(selectedHero);
+    onLinesChange([]);
+
     try {
       const response = await fetch(buildLineOptionsUrl(), {
         method: 'POST',
@@ -265,39 +265,39 @@ function TaskFilters({
           pos: scenario.join('_'),
           hero: selectedHero,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch line options: ${response.status}`)
+        throw new Error(`Failed to fetch line options: ${response.status}`);
       }
 
-      const data = await response.json()
-      const nextLineOptions = Array.isArray(data.lines) ? data.lines : []
-      onLinesOptionsChange(nextLineOptions)
+      const data = await response.json();
+      const nextLineOptions = Array.isArray(data.lines) ? data.lines : [];
+      onLinesOptionsChange(nextLineOptions);
     } catch (error) {
-      console.error(error)
-      onLinesOptionsChange([])
+      console.error(error);
+      onLinesOptionsChange([]);
     }
   }
 
   function isSelectedPosition(scenario, seat) {
-    return positions.join('_') === scenario.join('_') && hero === seat
+    return positions.join('_') === scenario.join('_') && hero === seat;
   }
 
   function toggleLine(lineOption) {
     onLinesChange(
       lines.includes(lineOption)
         ? lines.filter((selectedLine) => selectedLine !== lineOption)
-        : [...lines, lineOption],
-    )
+        : [...lines, lineOption]
+    );
   }
 
   function selectAllLines() {
-    onLinesChange(linesOptions)
+    onLinesChange(linesOptions);
   }
 
   function clearAllLines() {
-    onLinesChange([])
+    onLinesChange([]);
   }
 
   return (
@@ -316,7 +316,10 @@ function TaskFilters({
               ? { boxShadow: '0 14px 24px rgba(38, 168, 200, 0.22)' }
               : styles.primaryActionDisabled),
           }}
-          onClick={() => { setActiveView('trainer'); onGenerateTask(); }}
+          onClick={() => {
+            setActiveView('trainer');
+            onGenerateTask();
+          }}
           disabled={!canGenerateTask || isGeneratingTask}
         >
           {isGeneratingTask ? 'Generating...' : 'Generate Training Task'}
@@ -334,24 +337,22 @@ function TaskFilters({
                   type="button"
                   style={{
                     ...styles.optionBtn,
-                    ...(
-                      (field === 'pot' ? pot : field === 'stack' ? stack : street) === option
-                        ? styles.optionBtnActive
-                        : {}
-                    ),
+                    ...((field === 'pot' ? pot : field === 'stack' ? stack : street) === option
+                      ? styles.optionBtnActive
+                      : {}),
                   }}
                   onClick={() => {
                     if (field === 'pot') {
-                      onPotChange(option)
-                      return
+                      onPotChange(option);
+                      return;
                     }
 
                     if (field === 'stack') {
-                      onStackChange(option)
-                      return
+                      onStackChange(option);
+                      return;
                     }
 
-                    onStreetChange(option)
+                    onStreetChange(option);
                   }}
                 >
                   {option}
@@ -447,7 +448,7 @@ function TaskFilters({
         <pre style={styles.pre}>{JSON.stringify(filters, null, 2)}</pre>
       </div>
     </section>
-  )
+  );
 }
 
-export default TaskFilters
+export default TaskFilters;
