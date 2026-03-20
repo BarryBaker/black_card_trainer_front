@@ -64,7 +64,8 @@ const styles = {
     gap: '12px',
     padding: '16px 18px',
     borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-    background: 'linear-gradient(180deg, rgba(255, 203, 120, 0.14) 0%, rgba(255, 255, 255, 0.02) 100%)',
+    background:
+      'linear-gradient(180deg, rgba(255, 203, 120, 0.14) 0%, rgba(255, 255, 255, 0.02) 100%)',
   },
   titleWrap: {
     display: 'flex',
@@ -118,13 +119,13 @@ const styles = {
     gap: '2px',
     flexWrap: 'wrap',
   },
-//   comboText: {
-//     minWidth: '82px',
-//     fontSize: '0.76rem',
-//     letterSpacing: '0.04em',
-//     textTransform: 'uppercase',
-//     color: 'rgba(255, 255, 255, 0.6)',
-//   },
+  //   comboText: {
+  //     minWidth: '82px',
+  //     fontSize: '0.76rem',
+  //     letterSpacing: '0.04em',
+  //     textTransform: 'uppercase',
+  //     color: 'rgba(255, 255, 255, 0.6)',
+  //   },
   strategy: {
     // flex: 1,
     // display: 'flex',

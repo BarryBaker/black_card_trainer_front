@@ -447,7 +447,6 @@ function TaskFilters({
                         ...(val === true ? styles.optionBtnActive : {}),
                       }}
                       onClick={() => handleOnBoardChange(key, val === true ? null : true)}
-
                     >
                       {selectedLabel}
                     </button>
@@ -468,86 +467,86 @@ function TaskFilters({
           ))}
         </div>
         {/* <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', flexWrap: 'wrap' }}> */}
-          <label style={{ ...styles.fieldCard, ...styles.fieldCardCPos }}>
-            <span style={styles.fieldLabel}>Positions</span>
-            <div style={styles.positionGroup}>
-              {positionOptions.length === 0 ? (
-                <span style={{ fontSize: '0.72rem', color: '#5a6a78' }}>
-                  No positions available for this pot and stack pairing
-                </span>
-              ) : (
-                positionOptions.map((scenario) => (
-                  <div
-                    key={scenario.join('_')}
-                    style={{
-                      ...styles.positionScenario,
-                      gridTemplateColumns: `repeat(${scenario.length}, minmax(0, 1fr))`,
-                    }}
-                  >
-                    {scenario.map((seat) => (
-                      <button
-                        key={`${scenario.join('_')}-${seat}`}
-                        type="button"
-                        style={{
-                          ...styles.optionBtn,
-                          ...(isSelectedPosition(scenario, seat) ? styles.optionBtnActive : {}),
-                        }}
-                        onClick={() => handleScenarioSeatClick(scenario, seat)}
-                      >
-                        {seat}
-                      </button>
-                    ))}
-                  </div>
-                ))
-              )}
-            </div>
-          </label>
+        <label style={{ ...styles.fieldCard, ...styles.fieldCardCPos }}>
+          <span style={styles.fieldLabel}>Positions</span>
+          <div style={styles.positionGroup}>
+            {positionOptions.length === 0 ? (
+              <span style={{ fontSize: '0.72rem', color: '#5a6a78' }}>
+                No positions available for this pot and stack pairing
+              </span>
+            ) : (
+              positionOptions.map((scenario) => (
+                <div
+                  key={scenario.join('_')}
+                  style={{
+                    ...styles.positionScenario,
+                    gridTemplateColumns: `repeat(${scenario.length}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {scenario.map((seat) => (
+                    <button
+                      key={`${scenario.join('_')}-${seat}`}
+                      type="button"
+                      style={{
+                        ...styles.optionBtn,
+                        ...(isSelectedPosition(scenario, seat) ? styles.optionBtnActive : {}),
+                      }}
+                      onClick={() => handleScenarioSeatClick(scenario, seat)}
+                    >
+                      {seat}
+                    </button>
+                  ))}
+                </div>
+              ))
+            )}
+          </div>
+        </label>
 
-          <label style={styles.fieldCard}>
-            <div style={styles.fieldHeader}>
-              <span style={styles.fieldLabel}>Lines</span>
-              <div style={styles.iconActions}>
-                <button
-                  type="button"
-                  style={styles.iconBtn}
-                  onClick={selectAllLines}
-                  aria-label="Select all lines"
-                  title="Select all"
-                >
-                  +
-                </button>
-                <button
-                  type="button"
-                  style={styles.iconBtn}
-                  onClick={clearAllLines}
-                  aria-label="Clear all lines"
-                  title="Clear all"
-                >
-                  -
-                </button>
-              </div>
+        <label style={styles.fieldCard}>
+          <div style={styles.fieldHeader}>
+            <span style={styles.fieldLabel}>Lines</span>
+            <div style={styles.iconActions}>
+              <button
+                type="button"
+                style={styles.iconBtn}
+                onClick={selectAllLines}
+                aria-label="Select all lines"
+                title="Select all"
+              >
+                +
+              </button>
+              <button
+                type="button"
+                style={styles.iconBtn}
+                onClick={clearAllLines}
+                aria-label="Clear all lines"
+                title="Clear all"
+              >
+                -
+              </button>
             </div>
-            <div style={styles.optionGroup}>
-              {linesOptions.length === 0 ? (
-                <span style={{ fontSize: '0.72rem', color: '#5a6a78' }}>No lines available</span>
-              ) : (
-                linesOptions.map((lineOption) => (
-                  <button
-                    key={lineOption}
-                    type="button"
-                    style={{
-                      ...styles.optionBtn,
-                      ...(lines.includes(lineOption) ? styles.optionBtnActive : {}),
-                    }}
-                    onClick={() => toggleLine(lineOption)}
-                  >
-                    {lineOption}
-                  </button>
-                ))
-              )}
-            </div>
-          </label>
-        </div>
+          </div>
+          <div style={styles.optionGroup}>
+            {linesOptions.length === 0 ? (
+              <span style={{ fontSize: '0.72rem', color: '#5a6a78' }}>No lines available</span>
+            ) : (
+              linesOptions.map((lineOption) => (
+                <button
+                  key={lineOption}
+                  type="button"
+                  style={{
+                    ...styles.optionBtn,
+                    ...(lines.includes(lineOption) ? styles.optionBtnActive : {}),
+                  }}
+                  onClick={() => toggleLine(lineOption)}
+                >
+                  {lineOption}
+                </button>
+              ))
+            )}
+          </div>
+        </label>
+      </div>
       {/* </div> */}
 
       {/* <div style={styles.requestPreview}>

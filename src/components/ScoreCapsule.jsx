@@ -2,7 +2,8 @@ const styles = {
   scoreCapsule: {
     display: 'flex',
     flexDirection: 'column',
-    // alignItems: 'center',
+    width: '50%',
+    alignItems: 'center',
     justifyContent: 'center', // Center children vertically
     padding: '0px 20px',
     // border: 0,

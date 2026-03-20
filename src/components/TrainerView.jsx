@@ -16,7 +16,7 @@ const styles = {
     marginLeft: 'auto',
     marginRight: 'auto',
     padding: '12px',
-    paddingTop: '20px',
+    paddingTop: '10px',
     border: '1px solid rgba(255, 255, 255, 0.08)',
     borderRadius: '28px',
     background: 'rgba(7, 16, 25, 0.78)',
@@ -25,18 +25,18 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
   },
-  secondChild: {
-    flex: 1,
-    minHeight: 0,
-  },
-  heading: {
-    display: 'flex',
-    flexDirection: 'column',
-    // justifyContent: 'space-between',
-    // alignItems: 'flex-start',
-    gap: '24px',
-    flexWrap: 'wrap',
-  },
+  // secondChild: {
+  //   flex: 1,
+  //   minHeight: 0,
+  // },
+  // heading: {
+  //   display: 'flex',
+  //   flexDirection: 'row',
+  //   // justifyContent: 'space-between',
+  //   // alignItems: 'flex-start',
+  //   gap: '24px',
+  //   flexWrap: 'wrap',
+  // },
   kicker: {
     margin: 0,
     textTransform: 'uppercase',
@@ -81,8 +81,9 @@ const styles = {
     cursor: 'not-allowed',
     boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.06)',
   },
+
   splitRow: {
-    marginTop: '20px',
+    // marginTop: '20px',
     display: 'flex',
     position: 'relative',
     gap: '16px',
@@ -90,13 +91,20 @@ const styles = {
     flex: 1,
     minHeight: 0,
   },
-  splitPaneTable: {
+  score: {
+    display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+  marginBottom: '12px',
+  alignItems: 'center',
+  },
+  left: {
     flex: 10,
     minWidth: 0,
     display: 'flex',
     flexDirection: 'column',
   },
-  splitPaneTreeWrap: {
+  right: {
     position: 'relative',
     flex: 8,
     minWidth: 0,
@@ -116,6 +124,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
+    flexDirection: 'column',
   },
   previousNodeLabel: {
     margin: 0,
@@ -182,63 +191,24 @@ function TrainerView({
 
   return (
     <section className="page-panel page-panel-trainer" style={styles.panel}>
-      <div style={styles.heading}>
-        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-          <div>
-            <p style={styles.kicker}>Training Surface</p>
-            <p style={styles.title}>
-              {pot} {stack} BB
-            </p>
-          </div>
-          <ScoreCapsule score={score} />
-          <div>
-            <button type="button" style={styles.secondaryAction} onClick={onBack}>
-              Edit Filters
-            </button>
-          </div>
-        </div>
-        <div>
-          {previousActions ? (
-            <div style={styles.previousNodeWrap}>
-              {/* <p style={styles.previousNodeLabel}>Previous Mix</p> */}
-              <ActionCapsule actions={previousActions} shouldNormalize={false} />
-              <span>Correct: {previousMaxAction}</span>
-              <span>Answer: {previousAnswer}</span>
-              <span
-                title={previousMaxAction === previousAnswer ? 'Correct!' : 'Incorrect'}
-                style={{
-                  fontSize: '1.1rem',
-                  lineHeight: 1,
-                  color: previousMaxAction === previousAnswer ? '#4cde80' : '#ff5f5f',
-                }}
-              >
-                {previousMaxAction === previousAnswer ? '✓' : '✗'}
-              </span>
-              <span style={{ display: 'flex', gap: 2 }}>
-                Board:{' '}
-                {parseCards(prevTaskPayload?.board).map((c, i) => (
-                  <Card key={i} rank={c.rank} suit={c.suit} scale={0.65} />
-                ))}
-              </span>
-              <span style={{ display: 'flex', gap: 2 }}>
-                Hero:
-                {parseCards(Object.keys(prevTaskPayload?.task ?? {})[0] ?? '').map((c, i) => (
-                  <Card key={i} rank={c.rank} suit={c.suit} scale={0.65} />
-                ))}
-              </span>
-              <span>{prevTaskPayload?.line}</span>
-            </div>
-          ) : null}
-          {!previousActions && prevTreeStatus === 'loading' ? (
-            <div style={styles.previousNodeWrap}>
-              <span style={styles.previousNodeLabel}>Preparing analysis tree...</span>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
       <div style={styles.splitRow}>
-        <div style={styles.splitPaneTable}>
+        <div style={styles.left}>
+          <div style={styles.score}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' ,width: '100%'}}>
+              <div>
+                <p style={styles.kicker}>Training Surface</p>
+                <p style={styles.title}>
+                  {pot} {stack} BB
+                </p>
+              </div>
+              <div>
+                <button type="button" style={styles.secondaryAction} onClick={onBack}>
+                  Edit Filters
+                </button>
+              </div>
+            </div>
+            <ScoreCapsule score={score} />
+          </div>
           <PokerTable
             stack={stack}
             pot={pot}
@@ -266,41 +236,88 @@ function TrainerView({
           </div>
           <SessionTaskHistory taskPayloads={sessionTaskPayloads} onTaskClick={onSessionTaskClick} />
         </div>
-        <div style={styles.splitPaneTreeWrap}>
-          {selectedNodeCards ? (
-            <CardModal cardsByCombo={selectedNodeCards} onClose={() => setSelectedNodeCards(null)} />
-          ) : null}
-          <div style={styles.splitPaneTree}>
-            <div
-              style={{
-                width: '100%',
-                display: 'flex',
-                position: 'relative',
-                justifyContent: 'center',
-                alignItems: 'center',
-                paddingBottom: '12px',
-                height: '32px',
-              }}
-            >
-              <label style={styles.treeToggleLabel}>
-                <input
-                  type="checkbox"
-                  checked={showCurrent}
-                  onChange={(event) => onShowCurrentChange(event.target.checked)}
-                />
-                Show current
-              </label>
-              {displayTree && <ActionCapsule actions={displayTree?.overall_actions} />}
+        <div style={styles.right}>
+          {previousActions ? (
+            <div style={styles.previousNodeWrap}>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexDirection: 'row' }}>
+                <ActionCapsule actions={previousActions} shouldNormalize={false} />
+
+                <span> {previousAnswer}</span>
+                <span
+                  title={previousMaxAction === previousAnswer ? 'Correct!' : 'Incorrect'}
+                  style={{
+                    fontSize: '1.1rem',
+                    lineHeight: 1,
+                    color: previousMaxAction === previousAnswer ? '#4cde80' : '#ff5f5f',
+                  }}
+                >
+                  {previousMaxAction === previousAnswer ? '✓' : '✗'}
+                </span>
+                {previousMaxAction !== previousAnswer && <span>Correct: {previousMaxAction}</span>}
+              </div>
+              <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                Board:
+                {parseCards(prevTaskPayload?.board).map((c, i) => (
+                  <Card key={i} rank={c.rank} suit={c.suit} scale={0.65} />
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                Hero:
+                {parseCards(Object.keys(prevTaskPayload?.task ?? {})[0] ?? '').map((c, i) => (
+                  <Card key={i} rank={c.rank} suit={c.suit} scale={0.65} />
+                ))}
+              </div>
+              <span>Line: {prevTaskPayload?.line}</span>
             </div>
-            {displayTaskPayload && displayTreeStatus === 'loading' ? (
-              <p style={{ ...styles.empty, padding: '0 16px' }}>Analysis tree is loading...</p>
+          ) : null}{' '}
+          <div>
+            {!previousActions && prevTreeStatus === 'loading' ? (
+              <div style={styles.previousNodeWrap}>
+                <span style={styles.previousNodeLabel}>Preparing analysis tree...</span>
+              </div>
             ) : null}
-            {displayTaskPayload && displayTreeStatus === 'error' ? (
-              <p style={{ ...styles.empty, padding: '0 16px' }}>Analysis tree failed to load.</p>
-            ) : null}
-            <Tree nodes={displayTree?.tree} onNodeCardsClick={setSelectedNodeCards} />
+            <div style={styles.splitPaneTreeWrap}>
+              {selectedNodeCards ? (
+                <CardModal
+                  cardsByCombo={selectedNodeCards}
+                  onClose={() => setSelectedNodeCards(null)}
+                />
+              ) : null}
+              <div style={styles.splitPaneTree}>
+                <div
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    position: 'relative',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingBottom: '12px',
+                    height: '32px',
+                  }}
+                >
+                  <label style={styles.treeToggleLabel}>
+                    <input
+                      type="checkbox"
+                      checked={showCurrent}
+                      onChange={(event) => onShowCurrentChange(event.target.checked)}
+                    />
+                    Show current
+                  </label>
+                  {displayTree && <ActionCapsule actions={displayTree?.overall_actions} />}
+                </div>
+                {displayTaskPayload && displayTreeStatus === 'loading' ? (
+                  <p style={{ ...styles.empty, padding: '0 16px' }}>Analysis tree is loading...</p>
+                ) : null}
+                {displayTaskPayload && displayTreeStatus === 'error' ? (
+                  <p style={{ ...styles.empty, padding: '0 16px' }}>
+                    Analysis tree failed to load.
+                  </p>
+                ) : null}
+                <Tree nodes={displayTree?.tree} onNodeCardsClick={setSelectedNodeCards} />
+              </div>
+            </div>
           </div>
-        </div>
+        </div>{' '}
       </div>
     </section>
   );

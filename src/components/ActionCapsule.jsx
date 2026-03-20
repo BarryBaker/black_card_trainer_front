@@ -43,7 +43,7 @@ const actionColors = {
   R20: 'linear-gradient(180deg, #db5757 0%, #561b1b 100%)',
   R25: 'linear-gradient(180deg, #eb7979 0%, #5f2e2e 100%)',
   R33: 'linear-gradient(180deg, #d86767 0%, #662929 100%)',
-   R40: 'linear-gradient(180deg, #d86767 0%, #662929 100%)',
+  R40: 'linear-gradient(180deg, #d86767 0%, #662929 100%)',
   R50: 'linear-gradient(180deg, #b36060 0%, #422121 100%)',
   R66: 'linear-gradient(180deg, #9b4d4d 0%, #482525 100%)',
   R75: 'linear-gradient(180deg, #c05454e1 0%, #511f1f 100%)',
@@ -103,7 +103,7 @@ function ActionCapsule({ actions, label = '', shouldNormalize = true }) {
             width: `${segment.widthPercent}%`,
             background: getSegmentBackground(segment.action, index),
           }}
-          title={`${segment.action}: ${(shouldNormalize ? (segment.value * 100).toFixed(1) : segment.value.toFixed(1))}%`}
+          title={`${segment.action}: ${shouldNormalize ? (segment.value * 100).toFixed(1) : segment.value.toFixed(1)}%`}
         />
       ))}
       {label ? <div style={styles.label}>{label}</div> : null}
