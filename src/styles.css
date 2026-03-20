@@ -19,6 +19,68 @@
   --shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
 
+@keyframes pageTurnFromLeft {
+  0% {
+    opacity: 0;
+    transform: perspective(1800px) rotateY(-22deg) translateX(-48px) scale(0.985);
+    filter: blur(4px) brightness(0.8);
+  }
+  55% {
+    opacity: 1;
+    transform: perspective(1800px) rotateY(4deg) translateX(6px) scale(1.002);
+    filter: blur(0) brightness(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1800px) rotateY(0deg) translateX(0) scale(1);
+    filter: blur(0) brightness(1);
+  }
+}
+
+@keyframes pageTurnFromRight {
+  0% {
+    opacity: 0;
+    transform: perspective(1800px) rotateY(22deg) translateX(48px) scale(0.985);
+    filter: blur(4px) brightness(0.8);
+  }
+  55% {
+    opacity: 1;
+    transform: perspective(1800px) rotateY(-4deg) translateX(-6px) scale(1.002);
+    filter: blur(0) brightness(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1800px) rotateY(0deg) translateX(0) scale(1);
+    filter: blur(0) brightness(1);
+  }
+}
+
+.page-panel {
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  will-change: opacity, transform, filter;
+}
+
+.page-panel-trainer {
+  transform-origin: left center;
+  animation: pageTurnFromLeft 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.page-panel-filters {
+  transform-origin: right center;
+  animation: pageTurnFromRight 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-panel,
+  .page-panel-trainer,
+  .page-panel-filters {
+    animation: none;
+    transform: none;
+    filter: none;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -41,11 +103,7 @@ select {
 .app-shell {
   width: min(1120px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 32px 0 56px;
-}
-
-.hero-panel {
-  /* padding: 24px 0 12px; */
+  /* padding: 32px 0 56px; */
 }
 
 .hero-panel h1 {

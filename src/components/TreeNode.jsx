@@ -62,31 +62,33 @@ const styles = {
   },
 };
 
-
-
-
-function TreeNode({ node, onClick,hasTaskHand, showSubtree }) {
+function TreeNode({ node, onClick, onMassClick, hasTaskHand, showSubtree }) {
   const safeIndentation = Number.isFinite(node?.indentation) ? node.indentation : 0;
   const safeBestFeature = node?.best_feature ?? '';
   const isTaskHand = node?.taskhand === true;
+  const hasChildren = Array.isArray(node?.subtree) && node.subtree.length > 0;
+  const hasCards =
+    node?.cards && typeof node.cards === 'object' && Object.keys(node.cards).length > 0;
 
   return (
     safeIndentation === 0 && (
-      <div
-        style={{ ...styles.row, cursor: onClick ? 'pointer' : 'default' }}
-        onClick={onClick}
-      >
+      <div style={{ ...styles.row, cursor: onClick ? 'pointer' : 'default' }}>
         {/* {Array.from({ length: safeIndentation }).map((_, i) => (
           <div
             key={i}
             style={i === 0 ? { ...styles.indent, ...styles.firstIndent } : styles.indent}
           />
         ))} */}
-        <ActionCapsule actions={node?.action} label={safeBestFeature} />
-        <div style={styles.mass}>
+        <div onClick={onClick}>
+          <ActionCapsule actions={node?.action} label={safeBestFeature} />
+        </div>
+        <div
+          style={{ ...styles.mass, cursor: hasCards ? 'pointer' : 'default' }}
+          onClick={hasCards ? onMassClick : undefined}
+        >
           {typeof node.mass === 'number' ? (node.mass * 100).toFixed(1) + '%' : ''}
         </div>
-        {node?.subtree?.length > 0 && (
+        {hasChildren && (
           <div
             style={styles.expandToggle}
             title={showSubtree ? 'Collapse' : 'Expand'}
@@ -101,7 +103,7 @@ function TreeNode({ node, onClick,hasTaskHand, showSubtree }) {
           </div>
         )}
         <div style={styles.signalWrap}>
-          {((isTaskHand && node.subtree.length === 0) || (hasTaskHand && !showSubtree)) && (
+          {((isTaskHand && !hasChildren) || (hasTaskHand && !showSubtree)) && (
             <div
               style={styles.signal}
               title="Task hand is in this group"

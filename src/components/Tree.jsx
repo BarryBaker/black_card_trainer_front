@@ -14,16 +14,17 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
   },
-  empty: {
-    margin: 0,
-    color: 'rgba(255, 255, 255, 0.62)',
-    fontSize: '0.92rem',
-  },
-  //   tree: {
-  //     display: 'flex',
-  //     flexDirection: 'column',
-  //     gap: '8px',
-  //   },
+  // empty: {
+  //   margin: 0,
+  //   color: 'rgba(255, 255, 255, 0.62)',
+  //   fontSize: '0.92rem',
+  // },
+  // tree: {
+  //   // display: 'flex',
+  //   // flexDirection: 'column',
+  //   // gap: '8px',
+  //   paddingLeft: '4px',
+  // },
 };
 
 function hasTaskHandInTree(node) {
@@ -39,11 +40,24 @@ function hasTaskHandInTree(node) {
   return children.some((child) => hasTaskHandInTree(child));
 }
 
-function Tree({ nodes }) {
+function initializeNodeVisibility(node) {
+  const children = Array.isArray(node?.subtree) ? node.subtree : [];
+  const nextChildren = children.map((child) => initializeNodeVisibility(child));
+  const hasTaskHand =
+    node?.taskhand === true || nextChildren.some((child) => hasTaskHandInTree(child));
+
+  return {
+    ...node,
+    show: hasTaskHand ? true : Boolean(node?.show),
+    subtree: nextChildren,
+  };
+}
+
+function Tree({ nodes, onNodeCardsClick }) {
   const [treeNodes, setTreeNodes] = useState(Array.isArray(nodes) ? nodes : []);
 
   useEffect(() => {
-    setTreeNodes(Array.isArray(nodes) ? nodes : []);
+    setTreeNodes(Array.isArray(nodes) ? nodes.map((node) => initializeNodeVisibility(node)) : []);
   }, [nodes]);
 
   const handleNodeClick = (clickedIndex) => {
@@ -54,20 +68,28 @@ function Tree({ nodes }) {
     );
   };
 
+  const handleMassClick = (event, node) => {
+    event.stopPropagation();
+    if (
+      node?.cards &&
+      typeof node.cards === 'object' &&
+      Object.keys(node.cards).length > 0 &&
+      onNodeCardsClick
+    ) {
+      onNodeCardsClick(node.cards);
+    }
+  };
+
   if (!Array.isArray(nodes)) {
     return (
       <div style={styles.panel}>
-        <p style={styles.empty}>No tree data available.</p>
+        <p style={styles.empty}></p>
       </div>
     );
   }
 
   return (
     <div style={styles.panel}>
-      {/* <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <ActionCapsule actions={overall_actions} />
-      </div> */}
-
       <div style={styles.tree}>
         {treeNodes.map((node, index) => (
           <div key={`${node?.best_feature ?? 'n/a'}-${index}`}>
@@ -76,10 +98,11 @@ function Tree({ nodes }) {
               hasTaskHand={hasTaskHandInTree(node)}
               showSubtree={node?.show}
               onClick={() => handleNodeClick(index)}
+              onMassClick={(event) => handleMassClick(event, node)}
             />
             {node?.subtree?.length > 0 && node.show && (
-              <div style={{ marginLeft: '40px' }}>
-                <Tree nodes={node?.subtree} />
+              <div style={{ marginLeft: '33px' }}>
+                <Tree nodes={node?.subtree} onNodeCardsClick={onNodeCardsClick} />
               </div>
             )}
           </div>

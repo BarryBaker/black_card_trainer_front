@@ -7,6 +7,38 @@ function buildTrainTaskUrl() {
   return `${baseUrl}/api/db/train`;
 }
 
+function createTaskEntry(taskPayload, tree = null, treeStatus = 'idle') {
+  return {
+    taskPayload,
+    tree,
+    treeStatus,
+  };
+}
+
+function getTaskHand(taskPayload) {
+  return Object.keys(taskPayload?.task ?? {})[0] ?? null;
+}
+
+function cloneTaskPayload(taskPayload) {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(taskPayload);
+  }
+
+  return JSON.parse(JSON.stringify(taskPayload));
+}
+
+function updateEntryTree(entry, taskId, treeStatus, tree = null) {
+  if (!entry || entry.taskPayload?.id !== taskId) {
+    return entry;
+  }
+
+  return {
+    ...entry,
+    tree,
+    treeStatus,
+  };
+}
+
 function App() {
   const [pot, setPot] = useState('SRP');
   const [stack, setStack] = useState('100bb');
@@ -16,15 +48,24 @@ function App() {
   const [linesOptions, setLinesOptions] = useState([]);
   const [lines, setLines] = useState([]);
   const [activeView, setActiveView] = useState('filters');
-  const [prevTaskPayload, setPrevTaskPayload] = useState(null);
-  const [taskPayload, setTaskPayload] = useState(null);
-  const [nextTaskPayload, setNextTaskPayload] = useState(null);
-  const [tree, setTree] = useState(null);
-  const [prevTree, setPrevTree] = useState(null);
-  const [nextTree, setNextTree] = useState(null);
+  const [prevEntry, setPrevEntry] = useState(null);
+  const [currentEntry, setCurrentEntry] = useState(null);
+  const [nextEntry, setNextEntry] = useState(null);
+  const [board, setBoard] = useState({
+    flopPaired: null,
+    flopStraight: null,
+    flopFlush: null,
+    flopSuited: null,
+    turnPaired: null,
+    turnStraight: null,
+    turnFlush: null,
+    turnSuited: null,
+  });
   const [isGeneratingTask, setIsGeneratingTask] = useState(false);
   const [answer, setAnswer] = useState(null);
   const [score, setScore] = useState(null);
+  const [sessionTaskPayloads, setSessionTaskPayloads] = useState([]);
+  const [showCurrent, setShowCurrent] = useState(false);
 
   useEffect(() => {
     if (!pot || !stack || !street || positions.length === 0 || !hero) {
@@ -34,14 +75,14 @@ function App() {
   }, [pot, stack, street, positions, hero]);
 
   useEffect(() => {
-    setPrevTaskPayload(null);
-    setTaskPayload(null);
-    setNextTaskPayload(null);
-    setTree(null);
-    setPrevTree(null);
-    setNextTree(null);
+    setPrevEntry(null);
+    setCurrentEntry(null);
+    setNextEntry(null);
+    setAnswer(null);
     setScore(null);
-  }, [pot, stack, street, positions, hero, lines]);
+    setSessionTaskPayloads([]);
+    setShowCurrent(false);
+  }, [pot, stack, street, positions, hero, lines, board]);
 
   function handleLinesOptionsChange(nextLineOptions) {
     setLinesOptions(nextLineOptions);
@@ -63,6 +104,7 @@ function App() {
         pos: positions.join('_'),
         hero,
         line: lines,
+        board,
       }),
     });
 
@@ -102,9 +144,35 @@ function App() {
     return payload;
   }
 
+  function setTreeStateForTask(taskId, treeStatus, tree = null) {
+    setPrevEntry((entry) => updateEntryTree(entry, taskId, treeStatus, tree));
+    setCurrentEntry((entry) => updateEntryTree(entry, taskId, treeStatus, tree));
+    setNextEntry((entry) => updateEntryTree(entry, taskId, treeStatus, tree));
+  }
+
+  async function fetchTreeForEntry(taskPayload) {
+    const taskId = taskPayload?.id;
+    const taskhand = getTaskHand(taskPayload);
+
+    if (!taskId || !taskhand) {
+      throw new Error('Cannot fetch tree without a task id and task hand');
+    }
+
+    setTreeStateForTask(taskId, 'loading');
+
+    try {
+      const treePayload = await requestTree(taskId, taskhand);
+      setTreeStateForTask(taskId, 'ready', treePayload);
+      return treePayload;
+    } catch (error) {
+      setTreeStateForTask(taskId, 'error');
+      throw error;
+    }
+  }
+
   async function handleGenerateTask(getNext = false) {
     if (isGeneratingTask) {
-      return;
+      return false;
     }
 
     setIsGeneratingTask(true);
@@ -112,42 +180,55 @@ function App() {
     try {
       if (getNext) {
         const prefetchedTask = await requestTaskPayload();
-        setNextTaskPayload(prefetchedTask);
-        console.log('Prefetched Task:', prefetchedTask);
-        // requestTree(prefetchedTask.id,Object.keys(prefetchedTask.task)[0]).then(setNextTree)
-        return;
+        setNextEntry(createTaskEntry(prefetchedTask, null, 'idle'));
+        fetchTreeForEntry(prefetchedTask).catch(console.error);
+        return true;
       }
 
-      const currentTask = await requestTaskPayload();
-      const prefetchedTask = await requestTaskPayload();
-      console.log('Current Task:', currentTask, 'Prefetched Task:', prefetchedTask);
+      const [currentTask, prefetchedTask] = await Promise.all([
+        requestTaskPayload(),
+        requestTaskPayload(),
+      ]);
 
-      setTaskPayload(currentTask);
-      setNextTaskPayload(prefetchedTask);
-      requestTree(currentTask.id, Object.keys(currentTask.task)[0]).then(setTree);
-      // requestTree(prefetchedTask.id).then(setNextTree)
+      setPrevEntry(null);
+      setCurrentEntry(createTaskEntry(currentTask, null, 'loading'));
+      setNextEntry(createTaskEntry(prefetchedTask, null, 'idle'));
+      setAnswer(null);
+
+      fetchTreeForEntry(prefetchedTask).catch(console.error);
+      await fetchTreeForEntry(currentTask);
+
+      return true;
     } catch (error) {
       console.error(error);
+      return false;
     } finally {
       setIsGeneratingTask(false);
     }
   }
 
-  function handleSolveTask(answer) {
-    if (!taskPayload || !nextTaskPayload || isGeneratingTask) {
+  function handleSolveTask(selectedAnswer) {
+    if (!currentEntry?.taskPayload || !nextEntry?.taskPayload) {
       return;
     }
 
+    const solvedTaskPayload = {
+      ...cloneTaskPayload(currentEntry.taskPayload),
+      answerGiven: selectedAnswer,
+    };
+
+    setSessionTaskPayloads((currentTaskPayloads) => [...currentTaskPayloads, solvedTaskPayload]);
+
     // Calculate score first
-    const actions = Object.values(taskPayload?.task ?? {})[0] ?? null;
+    const actions = Object.values(currentEntry.taskPayload?.task ?? {})[0] ?? null;
     const maxAction = actions
       ? Object.entries(actions).reduce(
           (maxKey, [key, value]) => (value > actions[maxKey] ? key : maxKey),
           Object.keys(actions)[0]
         )
       : null;
-    console.log('Previous Max Action:', maxAction, 'User Answer:', answer);
-    const isCorrect = maxAction === answer;
+
+    const isCorrect = maxAction === selectedAnswer;
     setScore((prevScore) => {
       if (prevScore === null) {
         return {
@@ -162,23 +243,37 @@ function App() {
     });
 
     // Resume with the function
-    setAnswer(answer);
-    setPrevTaskPayload(taskPayload);
-    setTaskPayload(nextTaskPayload);
-    setTree(null);
-    requestTree(taskPayload.id, Object.keys(taskPayload.task)[0]).then(setTree);
+    setAnswer(selectedAnswer);
+
+    setPrevEntry({
+      ...currentEntry,
+      taskPayload: solvedTaskPayload,
+    });
+    setCurrentEntry(nextEntry);
+    setNextEntry(null);
+    setShowCurrent(false);
+
     handleGenerateTask(true);
+  }
+
+  function handleSessionTaskClick(taskPayload) {
+    if (!taskPayload) {
+      return;
+    }
+
+    setPrevEntry(createTaskEntry(taskPayload, null, 'loading'));
+    fetchTreeForEntry(taskPayload).catch(console.error);
   }
 
   function handleBackToFilters() {
     setActiveView('filters');
-    setPrevTaskPayload(null);
-    setTaskPayload(null);
-    setNextTaskPayload(null);
-    setTree(null);
-    setPrevTree(null);
-    setNextTree(null);
+    setPrevEntry(null);
+    setCurrentEntry(null);
+    setNextEntry(null);
+    setAnswer(null);
     setScore(null);
+    setSessionTaskPayloads([]);
+    setShowCurrent(false);
   }
 
   function handlePotChange(nextPot) {
@@ -207,10 +302,14 @@ function App() {
 
   return (
     <div className="app-shell">
-      <header className="hero-panel">
-        <p className="eyebrow">Pot-Limit Omaha GTO Trainer</p>
-        {/* <h1>Black Card Trainer</h1> */}
-      </header>
+      {activeView === 'filters' && (
+        <header className="hero-panel">
+          <p className="eyebrow" style={{ paddingTop: '20px' }}>
+            Pot-Limit Omaha GTO Trainer
+          </p>
+          {/* <h1>Black Card Trainer</h1> */}
+        </header>
+      )}
 
       <main>
         {activeView === 'filters' ? (
@@ -229,19 +328,25 @@ function App() {
             onHeroChange={setHero}
             onLinesOptionsChange={handleLinesOptionsChange}
             onLinesChange={setLines}
+            board={board}
+            onBoardChange={setBoard}
             onGenerateTask={handleGenerateTask}
             isGeneratingTask={isGeneratingTask}
             setActiveView={setActiveView}
           />
         ) : (
           <TrainerView
-            taskPayload={taskPayload}
-            prevTaskPayload={prevTaskPayload}
-            nextTaskPayload={nextTaskPayload}
-            prevTree={prevTree}
-            nextTree={nextTree}
-            tree={tree}
-            answer={answer}
+            taskPayload={currentEntry?.taskPayload ?? null}
+            prevTaskPayload={prevEntry?.taskPayload ?? null}
+            nextTaskPayload={nextEntry?.taskPayload ?? null}
+            onSessionTaskClick={handleSessionTaskClick}
+            sessionTaskPayloads={sessionTaskPayloads}
+            prevTree={prevEntry?.tree ?? null}
+            prevTreeStatus={prevEntry?.treeStatus ?? 'idle'}
+            tree={currentEntry?.tree ?? null}
+            treeStatus={currentEntry?.treeStatus ?? 'idle'}
+            showCurrent={showCurrent}
+            onShowCurrentChange={setShowCurrent}
             score={score}
             onBack={handleBackToFilters}
             isGeneratingTask={isGeneratingTask}

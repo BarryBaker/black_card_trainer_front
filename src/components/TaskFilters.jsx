@@ -4,6 +4,21 @@ const fieldOptions = {
   street: ['Flop', 'Turn'],
 };
 
+const boardOptions = {
+  Flop: [
+    ['flopPaired', 'Paired', 'Not Paired'],
+    ['flopStraight', 'Straight', 'Not Straight'],
+    ['flopFlush', 'Flush', 'Not Flush'],
+    ['flopSuited', 'Suited', 'Not Suited'],
+  ],
+  Turn: [
+    ['turnPaired', 'Paired', 'Not Paired'],
+    ['turnStraight', 'Straight', 'Not Straight'],
+    ['turnFlush', 'Flush', 'Not Flush'],
+    ['turnSuited', 'Suited', 'Not Suited'],
+  ],
+};
+
 const positionOptionsByScenario = {
   'SRP:100bb:Flop': [
     ['BTN', 'BB'],
@@ -52,6 +67,30 @@ function buildScenarioKey(pot, stack, street) {
   return `${pot}:${stack}:${street}`;
 }
 
+async function fetchLineOptions({ pot, stack, street, scenario, hero, board }) {
+  const response = await fetch(buildLineOptionsUrl(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      pot,
+      stack: Number.parseInt(stack, 10),
+      street,
+      pos: scenario.join('_'),
+      hero,
+      board,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch line options: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return Array.isArray(data.lines) ? data.lines : [];
+}
+
 const fieldLabels = {
   pot: 'Pot',
   stack: 'Stack',
@@ -63,6 +102,7 @@ const styles = {
     marginTop: '28px',
     padding: '24px',
     width: 'fit-content',
+    minWidth: '810px',
     maxWidth: '100%',
     border: '1px solid rgba(255, 255, 255, 0.08)',
     borderRadius: '28px',
@@ -95,7 +135,7 @@ const styles = {
   },
   grid: {
     display: 'flex',
-    gap: '18px',
+    gap: '23px',
     marginTop: '24px',
     flexWrap: 'wrap',
     width: 'fit-content',
@@ -103,10 +143,10 @@ const styles = {
   },
   fieldCard: {
     display: 'grid',
-    height: '400px',
+    height: '465px',
     width: '240px',
     gap: '12px',
-    padding: '18px',
+    padding: '6px',
     border: '1px solid rgba(255, 255, 255, 0.08)',
     borderRadius: '22px',
     background: 'rgba(255, 255, 255, 0.04)',
@@ -114,9 +154,20 @@ const styles = {
     overflowY: 'auto',
     overflowX: 'hidden',
   },
+  fieldCardCBoard: {
+    height: '268px',
+    width: '180px',
+    justifySelf: 'start',
+  },
   fieldCardCompact: {
     height: '200px',
-    width: '128px',
+    width: '68px',
+    justifySelf: 'start',
+  },
+  fieldCardCPos: {
+    height: 'fit-content',
+    maxHeight: '465px',
+    width: '200px',
     justifySelf: 'start',
   },
   fieldLabel: {
@@ -147,7 +198,7 @@ const styles = {
     width: '100%',
     height: '100%',
     minHeight: '40px',
-    padding: '0 10px',
+    // padding: '0 0px',
     border: '1px solid rgba(255, 255, 255, 0.14)',
     borderRadius: '8px',
     cursor: 'pointer',
@@ -234,6 +285,8 @@ function TaskFilters({
   onGenerateTask,
   isGeneratingTask = false,
   setActiveView,
+  board,
+  onBoardChange,
 }) {
   const positionOptions = positionOptionsByScenario[buildScenarioKey(pot, stack, street)] ?? [];
   const canGenerateTask = positions.length > 0 && Boolean(hero);
@@ -242,6 +295,7 @@ function TaskFilters({
     Pot: pot,
     Stack: stack,
     Street: street,
+    Board: board,
     Positions: positions,
     Hero: hero,
     Lines: lines,
@@ -253,26 +307,38 @@ function TaskFilters({
     onLinesChange([]);
 
     try {
-      const response = await fetch(buildLineOptionsUrl(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          pot,
-          stack: parseInt(stack),
-          street,
-          pos: scenario.join('_'),
-          hero: selectedHero,
-        }),
+      const nextLineOptions = await fetchLineOptions({
+        pot,
+        stack,
+        street,
+        scenario,
+        hero: selectedHero,
+        board,
+      });
+      onLinesOptionsChange(nextLineOptions);
+    } catch (error) {
+      console.error(error);
+      onLinesOptionsChange([]);
+    }
+  }
+  async function handleOnBoardChange(key, val) {
+    if (hero === '' || positions.length === 0) {
+      onBoardChange({ ...board, [key]: val });
+      return;
+    }
+    onBoardChange({ ...board, [key]: val });
+    onLinesChange([]);
+
+    try {
+      const nextLineOptions = await fetchLineOptions({
+        pot,
+        stack,
+        street,
+        scenario: positions,
+        hero,
+        board: { ...board, [key]: val },
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch line options: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const nextLineOptions = Array.isArray(data.lines) ? data.lines : [];
       onLinesOptionsChange(nextLineOptions);
     } catch (error) {
       console.error(error);
@@ -301,7 +367,7 @@ function TaskFilters({
   }
 
   return (
-    <section style={styles.panel}>
+    <section className="page-panel page-panel-filters" style={styles.panel}>
       <div style={styles.heading}>
         <div>
           <p style={styles.kicker}>Scenario Setup</p>
@@ -316,9 +382,12 @@ function TaskFilters({
               ? { boxShadow: '0 14px 24px rgba(38, 168, 200, 0.22)' }
               : styles.primaryActionDisabled),
           }}
-          onClick={() => {
-            setActiveView('trainer');
-            onGenerateTask();
+          onClick={async () => {
+            const didGenerate = await onGenerateTask();
+
+            if (didGenerate) {
+              setActiveView('trainer');
+            }
           }}
           disabled={!canGenerateTask || isGeneratingTask}
         >
@@ -327,126 +396,164 @@ function TaskFilters({
       </div>
 
       <div style={styles.grid}>
-        {Object.entries(fieldOptions).map(([field, options]) => (
-          <label key={field} style={{ ...styles.fieldCard, ...styles.fieldCardCompact }}>
-            <span style={styles.fieldLabel}>{fieldLabels[field]}</span>
-            <div style={styles.optionGroup}>
-              {options.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  style={{
-                    ...styles.optionBtn,
-                    ...((field === 'pot' ? pot : field === 'stack' ? stack : street) === option
-                      ? styles.optionBtnActive
-                      : {}),
-                  }}
-                  onClick={() => {
-                    if (field === 'pot') {
-                      onPotChange(option);
-                      return;
-                    }
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexWrap: 'wrap' }}>
+          {Object.entries(fieldOptions).map(([field, options]) => (
+            <label key={field} style={{ ...styles.fieldCard, ...styles.fieldCardCompact }}>
+              <span style={styles.fieldLabel}>{fieldLabels[field]}</span>
+              <div style={styles.optionGroup}>
+                {options.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    style={{
+                      ...styles.optionBtn,
+                      ...((field === 'pot' ? pot : field === 'stack' ? stack : street) === option
+                        ? styles.optionBtnActive
+                        : {}),
+                    }}
+                    onClick={() => {
+                      if (field === 'pot') {
+                        onPotChange(option);
+                        return;
+                      }
 
-                    if (field === 'stack') {
-                      onStackChange(option);
-                      return;
-                    }
+                      if (field === 'stack') {
+                        onStackChange(option);
+                        return;
+                      }
 
-                    onStreetChange(option);
-                  }}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </label>
-        ))}
-
-        <label style={styles.fieldCard}>
-          <span style={styles.fieldLabel}>Positions</span>
-          <div style={styles.positionGroup}>
-            {positionOptions.length === 0 ? (
-              <span style={{ fontSize: '0.72rem', color: '#5a6a78' }}>
-                No positions available for this pot and stack pairing
-              </span>
-            ) : (
-              positionOptions.map((scenario) => (
-                <div
-                  key={scenario.join('_')}
-                  style={{
-                    ...styles.positionScenario,
-                    gridTemplateColumns: `repeat(${scenario.length}, minmax(0, 1fr))`,
-                  }}
-                >
-                  {scenario.map((seat) => (
+                      onStreetChange(option);
+                    }}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </label>
+          ))}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexWrap: 'wrap' }}>
+          {Object.entries(boardOptions).map(([boardStreet, pairs]) => (
+            <div key={boardStreet} style={{ ...styles.fieldCard, ...styles.fieldCardCBoard }}>
+              <span style={styles.fieldLabel}>{boardStreet} Board</span>
+              {pairs.map(([key, selectedLabel, notSelectedLabel]) => {
+                const val = board[key];
+                return (
+                  <div key={key} style={{ ...styles.optionGroup, gridTemplateColumns: '1fr 1fr' }}>
                     <button
-                      key={`${scenario.join('_')}-${seat}`}
                       type="button"
                       style={{
                         ...styles.optionBtn,
-                        ...(isSelectedPosition(scenario, seat) ? styles.optionBtnActive : {}),
+                        ...(val === true ? styles.optionBtnActive : {}),
                       }}
-                      onClick={() => handleScenarioSeatClick(scenario, seat)}
+                      onClick={() => handleOnBoardChange(key, val === true ? null : true)}
+
                     >
-                      {seat}
+                      {selectedLabel}
                     </button>
-                  ))}
-                </div>
-              ))
-            )}
-          </div>
-        </label>
-
-        <label style={styles.fieldCard}>
-          <div style={styles.fieldHeader}>
-            <span style={styles.fieldLabel}>Lines</span>
-            <div style={styles.iconActions}>
-              <button
-                type="button"
-                style={styles.iconBtn}
-                onClick={selectAllLines}
-                aria-label="Select all lines"
-                title="Select all"
-              >
-                +
-              </button>
-              <button
-                type="button"
-                style={styles.iconBtn}
-                onClick={clearAllLines}
-                aria-label="Clear all lines"
-                title="Clear all"
-              >
-                -
-              </button>
+                    <button
+                      type="button"
+                      style={{
+                        ...styles.optionBtn,
+                        ...(val === false ? styles.optionBtnActive : {}),
+                      }}
+                      onClick={() => handleOnBoardChange(key, val === false ? null : false)}
+                    >
+                      {notSelectedLabel}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-          </div>
-          <div style={styles.optionGroup}>
-            {linesOptions.length === 0 ? (
-              <span style={{ fontSize: '0.72rem', color: '#5a6a78' }}>No lines available</span>
-            ) : (
-              linesOptions.map((lineOption) => (
-                <button
-                  key={lineOption}
-                  type="button"
-                  style={{
-                    ...styles.optionBtn,
-                    ...(lines.includes(lineOption) ? styles.optionBtnActive : {}),
-                  }}
-                  onClick={() => toggleLine(lineOption)}
-                >
-                  {lineOption}
-                </button>
-              ))
-            )}
-          </div>
-        </label>
-      </div>
+          ))}
+        </div>
+        {/* <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', flexWrap: 'wrap' }}> */}
+          <label style={{ ...styles.fieldCard, ...styles.fieldCardCPos }}>
+            <span style={styles.fieldLabel}>Positions</span>
+            <div style={styles.positionGroup}>
+              {positionOptions.length === 0 ? (
+                <span style={{ fontSize: '0.72rem', color: '#5a6a78' }}>
+                  No positions available for this pot and stack pairing
+                </span>
+              ) : (
+                positionOptions.map((scenario) => (
+                  <div
+                    key={scenario.join('_')}
+                    style={{
+                      ...styles.positionScenario,
+                      gridTemplateColumns: `repeat(${scenario.length}, minmax(0, 1fr))`,
+                    }}
+                  >
+                    {scenario.map((seat) => (
+                      <button
+                        key={`${scenario.join('_')}-${seat}`}
+                        type="button"
+                        style={{
+                          ...styles.optionBtn,
+                          ...(isSelectedPosition(scenario, seat) ? styles.optionBtnActive : {}),
+                        }}
+                        onClick={() => handleScenarioSeatClick(scenario, seat)}
+                      >
+                        {seat}
+                      </button>
+                    ))}
+                  </div>
+                ))
+              )}
+            </div>
+          </label>
 
-      <div style={styles.requestPreview}>
+          <label style={styles.fieldCard}>
+            <div style={styles.fieldHeader}>
+              <span style={styles.fieldLabel}>Lines</span>
+              <div style={styles.iconActions}>
+                <button
+                  type="button"
+                  style={styles.iconBtn}
+                  onClick={selectAllLines}
+                  aria-label="Select all lines"
+                  title="Select all"
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  style={styles.iconBtn}
+                  onClick={clearAllLines}
+                  aria-label="Clear all lines"
+                  title="Clear all"
+                >
+                  -
+                </button>
+              </div>
+            </div>
+            <div style={styles.optionGroup}>
+              {linesOptions.length === 0 ? (
+                <span style={{ fontSize: '0.72rem', color: '#5a6a78' }}>No lines available</span>
+              ) : (
+                linesOptions.map((lineOption) => (
+                  <button
+                    key={lineOption}
+                    type="button"
+                    style={{
+                      ...styles.optionBtn,
+                      ...(lines.includes(lineOption) ? styles.optionBtnActive : {}),
+                    }}
+                    onClick={() => toggleLine(lineOption)}
+                  >
+                    {lineOption}
+                  </button>
+                ))
+              )}
+            </div>
+          </label>
+        </div>
+      {/* </div> */}
+
+      {/* <div style={styles.requestPreview}>
         <p style={styles.kicker}>Outgoing Payload Preview</p>
         <pre style={styles.pre}>{JSON.stringify(filters, null, 2)}</pre>
-      </div>
+      </div> */}
     </section>
   );
 }

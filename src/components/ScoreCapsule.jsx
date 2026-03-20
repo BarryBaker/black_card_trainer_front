@@ -1,29 +1,37 @@
 const styles = {
   scoreCapsule: {
-    padding: '12px 18px',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
+    display: 'flex',
+    flexDirection: 'column',
+    // alignItems: 'center',
+    justifyContent: 'center', // Center children vertically
+    padding: '0px 20px',
+    // border: 0,
+    border: '1px solid rgba(255, 255, 255, 0.12)', // Standard border draws outside content box
+    boxSizing: 'border-box', // Ensures border is included inside the element's dimensions
+    //  padding: '12px 18px',
     borderRadius: '50px',
+    // borderRadius: '999px',
     background: 'rgba(255, 255, 255, 0.06)',
     color: '#f8f3e9',
     fontWeight: 500,
     fontSize: '0.95rem',
     cursor: 'default',
-    display: 'inline-block',
+    // display: 'inline-block',
   },
   scoreValue: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: '4px',
+    gap: '10px',
   },
   label: {
-    fontSize: '0.75rem',
+    fontSize: '0.55rem',
     letterSpacing: '0.08em',
     textTransform: 'uppercase',
     color: 'rgba(255, 255, 255, 0.62)',
   },
   mainScore: {
-    fontSize: '1.2rem',
+    fontSize: '1rem',
     fontWeight: 600,
   },
   percentage: {

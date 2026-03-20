@@ -1,28 +1,39 @@
+import { useEffect, useState } from 'react';
 import PokerTable from './PokerTable';
 import Tree from './Tree';
 import ActionCapsule from './ActionCapsule';
+import CardModal from './CardModal';
 import ScoreCapsule from './ScoreCapsule';
 import Card, { parseCards } from './Card';
+import SessionTaskHistory from './SessionTaskHistory';
 import { sortActions } from '../utils/actionSorting';
 
 const styles = {
   panel: {
-    // marginTop: '28px',
-    width: '900px',
+    // margin: '8px',
+    width: '820px',
+    height: '100vh',
     marginLeft: 'auto',
     marginRight: 'auto',
-    padding: '24px',
+    padding: '12px',
+    paddingTop: '20px',
     border: '1px solid rgba(255, 255, 255, 0.08)',
     borderRadius: '28px',
     background: 'rgba(7, 16, 25, 0.78)',
     backdropFilter: 'blur(18px)',
     boxShadow: '0 24px 60px rgba(0, 0, 0, 0.34)',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  secondChild: {
+    flex: 1,
+    minHeight: 0,
   },
   heading: {
     display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: 'column',
+    // justifyContent: 'space-between',
+    // alignItems: 'flex-start',
     gap: '24px',
     flexWrap: 'wrap',
   },
@@ -57,29 +68,48 @@ const styles = {
     padding: '8px 14px',
     border: '1px solid rgba(255, 255, 255, 0.12)',
     borderRadius: '50px',
-    background: 'rgba(255, 255, 255, 0.06)',
+    background: 'rgba(82, 106, 140, 0.34)',
     color: '#f8f3e9',
     fontWeight: 500,
     fontSize: '0.95rem',
     cursor: 'pointer',
   },
+  actionButtonDisabled: {
+    border: '1px solid rgba(119, 144, 179, 0.45)',
+    background: 'rgba(255, 255, 255, 0.06)',
+    color: 'rgba(231, 238, 247, 0.72)',
+    cursor: 'not-allowed',
+    boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.06)',
+  },
   splitRow: {
     marginTop: '20px',
     display: 'flex',
-    gap: '22px',
+    position: 'relative',
+    gap: '16px',
     alignItems: 'stretch',
+    flex: 1,
+    minHeight: 0,
   },
   splitPaneTable: {
     flex: 10,
     minWidth: 0,
+    display: 'flex',
+    flexDirection: 'column',
   },
-  splitPaneTree: {
+  splitPaneTreeWrap: {
+    position: 'relative',
     flex: 8,
     minWidth: 0,
-    height: '750px',
+    minHeight: '750px',
+    height: '100%',
+  },
+  splitPaneTree: {
+    width: '100%',
+    height: '100%',
     overflowY: 'auto',
-    overflowX: 'hidden',
-     background: 'rgba(255, 255, 255, 0.03)',
+    overflowX: 'auto',
+    background: 'rgba(255, 255, 255, 0.03)',
+    scrollbarGutter: 'stable',
   },
   previousNodeWrap: {
     margin: '0 0 14px',
@@ -94,6 +124,15 @@ const styles = {
     textTransform: 'uppercase',
     color: 'rgba(255, 255, 255, 0.62)',
   },
+  treeToggleLabel: {
+    position: 'absolute',
+    left: 0,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    fontSize: '0.8rem',
+    color: 'rgba(255, 255, 255, 0.82)',
+  },
 };
 
 function TrainerView({
@@ -102,13 +141,26 @@ function TrainerView({
   isGeneratingTask,
   prevTaskPayload,
   nextTaskPayload,
+  sessionTaskPayloads,
+  onSessionTaskClick,
   prevTree,
-  nextTree,
   tree,
+  treeStatus,
+  prevTreeStatus,
+  showCurrent,
+  onShowCurrentChange,
   handleGenerateTask,
-  answer,
   score,
 }) {
+  const [selectedNodeCards, setSelectedNodeCards] = useState(null);
+  const displayTaskPayload = showCurrent ? taskPayload : prevTaskPayload;
+  const displayTree = showCurrent ? tree : prevTree;
+  const displayTreeStatus = showCurrent ? treeStatus : prevTreeStatus;
+
+  useEffect(() => {
+    setSelectedNodeCards(null);
+  }, [showCurrent, prevTree, tree]);
+
   if (!taskPayload) {
     return null;
   }
@@ -118,6 +170,7 @@ function TrainerView({
   const holecards = Object.keys(task)[0];
   const titleText = line === '' ? 'Hero starts the action' : `Actions: ${line}`;
   const actions = sortActions(Object.keys(task[holecards]));
+  const areActionsDisabled = !nextTaskPayload;
   const previousActions = Object.values(prevTaskPayload?.task ?? {})[0] ?? null;
   const previousMaxAction = previousActions
     ? Object.entries(previousActions).reduce(
@@ -125,37 +178,60 @@ function TrainerView({
         Object.keys(previousActions)[0]
       )
     : null;
+  const previousAnswer = prevTaskPayload?.answerGiven ?? null;
 
   return (
-    <section style={styles.panel}>
+    <section className="page-panel page-panel-trainer" style={styles.panel}>
       <div style={styles.heading}>
-        <div>
-          <p style={styles.kicker}>Training Surface</p>
-          <p style={styles.title}>
-            {pot} {stack} BB
-          </p>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+          <div>
+            <p style={styles.kicker}>Training Surface</p>
+            <p style={styles.title}>
+              {pot} {stack} BB
+            </p>
+          </div>
+          <ScoreCapsule score={score} />
+          <div>
+            <button type="button" style={styles.secondaryAction} onClick={onBack}>
+              Edit Filters
+            </button>
+          </div>
         </div>
-        <button type="button" style={styles.secondaryAction} onClick={onBack}>
-          Edit Filters
-        </button>
-
         <div>
           {previousActions ? (
             <div style={styles.previousNodeWrap}>
               {/* <p style={styles.previousNodeLabel}>Previous Mix</p> */}
-              <ActionCapsule actions={previousActions} />
-              <span>Top: {previousMaxAction}</span>
-              <span>Answer: {answer}</span>
+              <ActionCapsule actions={previousActions} shouldNormalize={false} />
+              <span>Correct: {previousMaxAction}</span>
+              <span>Answer: {previousAnswer}</span>
+              <span
+                title={previousMaxAction === previousAnswer ? 'Correct!' : 'Incorrect'}
+                style={{
+                  fontSize: '1.1rem',
+                  lineHeight: 1,
+                  color: previousMaxAction === previousAnswer ? '#4cde80' : '#ff5f5f',
+                }}
+              >
+                {previousMaxAction === previousAnswer ? '✓' : '✗'}
+              </span>
               <span style={{ display: 'flex', gap: 2 }}>
-                {parseCards(prevTaskPayload.board).map((c, i) => (
-                  <Card key={i} rank={c.rank} suit={c.suit} scale={0.5} />
+                Board:{' '}
+                {parseCards(prevTaskPayload?.board).map((c, i) => (
+                  <Card key={i} rank={c.rank} suit={c.suit} scale={0.65} />
                 ))}
               </span>
               <span style={{ display: 'flex', gap: 2 }}>
-                {parseCards(Object.keys(prevTaskPayload.task)[0]).map((c, i) => (
-                  <Card key={i} rank={c.rank} suit={c.suit} scale={0.5} />
+                Hero:
+                {parseCards(Object.keys(prevTaskPayload?.task ?? {})[0] ?? '').map((c, i) => (
+                  <Card key={i} rank={c.rank} suit={c.suit} scale={0.65} />
                 ))}
               </span>
+              <span>{prevTaskPayload?.line}</span>
+            </div>
+          ) : null}
+          {!previousActions && prevTreeStatus === 'loading' ? (
+            <div style={styles.previousNodeWrap}>
+              <span style={styles.previousNodeLabel}>Preparing analysis tree...</span>
             </div>
           ) : null}
         </div>
@@ -177,18 +253,53 @@ function TrainerView({
               <button
                 key={action}
                 type="button"
-                style={styles.actionButton}
+                style={{
+                  ...styles.actionButton,
+                  ...(areActionsDisabled ? styles.actionButtonDisabled : null),
+                }}
                 onClick={() => handleGenerateTask(action)}
-                disabled={isGeneratingTask || !nextTaskPayload}
+                disabled={areActionsDisabled}
               >
                 {action}
               </button>
             ))}
           </div>
-          <ScoreCapsule score={score} />
+          <SessionTaskHistory taskPayloads={sessionTaskPayloads} onTaskClick={onSessionTaskClick} />
         </div>
-        <div style={styles.splitPaneTree}>
-          <Tree nodes={tree?.tree} />
+        <div style={styles.splitPaneTreeWrap}>
+          {selectedNodeCards ? (
+            <CardModal cardsByCombo={selectedNodeCards} onClose={() => setSelectedNodeCards(null)} />
+          ) : null}
+          <div style={styles.splitPaneTree}>
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                position: 'relative',
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingBottom: '12px',
+                height: '32px',
+              }}
+            >
+              <label style={styles.treeToggleLabel}>
+                <input
+                  type="checkbox"
+                  checked={showCurrent}
+                  onChange={(event) => onShowCurrentChange(event.target.checked)}
+                />
+                Show current
+              </label>
+              {displayTree && <ActionCapsule actions={displayTree?.overall_actions} />}
+            </div>
+            {displayTaskPayload && displayTreeStatus === 'loading' ? (
+              <p style={{ ...styles.empty, padding: '0 16px' }}>Analysis tree is loading...</p>
+            ) : null}
+            {displayTaskPayload && displayTreeStatus === 'error' ? (
+              <p style={{ ...styles.empty, padding: '0 16px' }}>Analysis tree failed to load.</p>
+            ) : null}
+            <Tree nodes={displayTree?.tree} onNodeCardsClick={setSelectedNodeCards} />
+          </div>
         </div>
       </div>
     </section>
