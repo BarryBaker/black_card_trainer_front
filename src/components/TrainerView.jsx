@@ -10,7 +10,6 @@ import { sortActions } from '../utils/actionSorting';
 
 const styles = {
   panel: {
-    // margin: '8px',
     width: '820px',
     height: '100vh',
     marginLeft: 'auto',
@@ -25,18 +24,6 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
   },
-  // secondChild: {
-  //   flex: 1,
-  //   minHeight: 0,
-  // },
-  // heading: {
-  //   display: 'flex',
-  //   flexDirection: 'row',
-  //   // justifyContent: 'space-between',
-  //   // alignItems: 'flex-start',
-  //   gap: '24px',
-  //   flexWrap: 'wrap',
-  // },
   kicker: {
     margin: 0,
     textTransform: 'uppercase',
@@ -46,7 +33,6 @@ const styles = {
   },
   title: {
     margin: '4px 0 0',
-    // fontSize: 'clamp(1.8rem, 3vw, 2.8rem)',
   },
   secondaryAction: {
     padding: '12px 18px',
@@ -81,9 +67,7 @@ const styles = {
     cursor: 'not-allowed',
     boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.06)',
   },
-
   splitRow: {
-    // marginTop: '20px',
     display: 'flex',
     position: 'relative',
     gap: '16px',
@@ -93,10 +77,10 @@ const styles = {
   },
   score: {
     display: 'flex',
-  flexDirection: 'column',
-  gap: '6px',
-  marginBottom: '12px',
-  alignItems: 'center',
+    flexDirection: 'column',
+    gap: '6px',
+    marginBottom: '12px',
+    alignItems: 'center',
   },
   left: {
     flex: 10,
@@ -108,8 +92,15 @@ const styles = {
     position: 'relative',
     flex: 8,
     minWidth: 0,
-    minHeight: '750px',
-    height: '100%',
+    minHeight: 0,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  splitPaneTreeWrap: {
+    position: 'relative',
+    flex: 1,
+    minWidth: 0,
+    minHeight: 0,
   },
   splitPaneTree: {
     width: '100%',
@@ -118,6 +109,7 @@ const styles = {
     overflowX: 'auto',
     background: 'rgba(255, 255, 255, 0.03)',
     scrollbarGutter: 'stable',
+    borderRadius: '12px',
   },
   previousNodeWrap: {
     margin: '0 0 14px',
@@ -194,7 +186,14 @@ function TrainerView({
       <div style={styles.splitRow}>
         <div style={styles.left}>
           <div style={styles.score}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' ,width: '100%'}}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
               <div>
                 <p style={styles.kicker}>Training Surface</p>
                 <p style={styles.title}>
@@ -269,55 +268,52 @@ function TrainerView({
               </div>
               <span>Line: {prevTaskPayload?.line}</span>
             </div>
-          ) : null}{' '}
-          <div>
+          ) : null}
+          <div style={styles.splitPaneTreeWrap}>
             {!previousActions && prevTreeStatus === 'loading' ? (
               <div style={styles.previousNodeWrap}>
                 <span style={styles.previousNodeLabel}>Preparing analysis tree...</span>
               </div>
             ) : null}
-            <div style={styles.splitPaneTreeWrap}>
-              {selectedNodeCards ? (
-                <CardModal
-                  cardsByCombo={selectedNodeCards}
-                  onClose={() => setSelectedNodeCards(null)}
-                />
-              ) : null}
-              <div style={styles.splitPaneTree}>
-                <div
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    position: 'relative',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    paddingBottom: '12px',
-                    height: '32px',
-                  }}
-                >
-                  <label style={styles.treeToggleLabel}>
-                    <input
-                      type="checkbox"
-                      checked={showCurrent}
-                      onChange={(event) => onShowCurrentChange(event.target.checked)}
-                    />
-                    Show current
-                  </label>
-                  {displayTree && <ActionCapsule actions={displayTree?.overall_actions} />}
-                </div>
-                {displayTaskPayload && displayTreeStatus === 'loading' ? (
-                  <p style={{ ...styles.empty, padding: '0 16px' }}>Analysis tree is loading...</p>
-                ) : null}
-                {displayTaskPayload && displayTreeStatus === 'error' ? (
-                  <p style={{ ...styles.empty, padding: '0 16px' }}>
-                    Analysis tree failed to load.
-                  </p>
-                ) : null}
-                <Tree nodes={displayTree?.tree} onNodeCardsClick={setSelectedNodeCards} />
+
+            {selectedNodeCards ? (
+              <CardModal
+                cardsByCombo={selectedNodeCards}
+                onClose={() => setSelectedNodeCards(null)}
+              />
+            ) : null}
+            <div style={styles.splitPaneTree}>
+              <div
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  position: 'relative',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  paddingBottom: '12px',
+                  height: '32px',
+                }}
+              >
+                <label style={styles.treeToggleLabel}>
+                  <input
+                    type="checkbox"
+                    checked={showCurrent}
+                    onChange={(event) => onShowCurrentChange(event.target.checked)}
+                  />
+                  Show current
+                </label>
+                {displayTree && <ActionCapsule actions={displayTree?.overall_actions} />}
               </div>
+              {displayTaskPayload && displayTreeStatus === 'loading' ? (
+                <p style={{ ...styles.empty, padding: '0 16px' }}>Analysis tree is loading...</p>
+              ) : null}
+              {displayTaskPayload && displayTreeStatus === 'error' ? (
+                <p style={{ ...styles.empty, padding: '0 16px' }}>Analysis tree failed to load.</p>
+              ) : null}
+              <Tree nodes={displayTree?.tree} onNodeCardsClick={setSelectedNodeCards} />
             </div>
           </div>
-        </div>{' '}
+        </div>
       </div>
     </section>
   );

@@ -4,7 +4,7 @@ import TreeNode from './TreeNode';
 
 const styles = {
   panel: {
-    height: '100%',
+    // height: '100%',
     // minHeight: '380px',
     borderRadius: '18px',
     // border: '1px solid rgba(255, 255, 255, 0.12)',

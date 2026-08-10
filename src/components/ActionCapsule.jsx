@@ -40,6 +40,7 @@ const actionColors = {
   F: 'linear-gradient(180deg, #6e9affb7 0%, #1f2a51c2 100%)',
 
   C: 'linear-gradient(180deg, #c1a44c 0%, #4b401f 100%)',
+  MR: 'linear-gradient(180deg, #db5757 0%, #561b1b 100%)',
   R20: 'linear-gradient(180deg, #db5757 0%, #561b1b 100%)',
   R25: 'linear-gradient(180deg, #eb7979 0%, #5f2e2e 100%)',
   R33: 'linear-gradient(180deg, #d86767 0%, #662929 100%)',
@@ -48,8 +49,9 @@ const actionColors = {
   R66: 'linear-gradient(180deg, #9b4d4d 0%, #482525 100%)',
   R75: 'linear-gradient(180deg, #c05454e1 0%, #511f1f 100%)',
   R100: 'linear-gradient(180deg, #963a2c 0%, #3c0f0f 100%)',
+  
 
-  A: 'linear-gradient(180deg, #ce3419 0%, #551b16 100%)',
+  A: 'linear-gradient(180deg, #c24d38 0%, #3c130f 100%)',
 };
 
 function getSegmentBackground(action, index) {
