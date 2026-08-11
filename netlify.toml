@@ -5,9 +5,23 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Redirects are NOT declared here on purpose: netlify.toml rules are evaluated
-# before _redirects, so the SPA catch-all would shadow the /api proxy.
-# scripts/generate-redirects.mjs writes dist/_redirects in the right order.
+# Order matters: rules are evaluated top to bottom, so the API proxy has to come
+# before the SPA catch-all or /api/* would be answered with index.html.
+
+# Proxies API calls to the Railway backend. Because the browser only ever talks
+# to the Netlify origin, there is no CORS to configure on the backend.
+[[redirects]]
+  from = "/api/*"
+  to = "https://blackcardtrainerback-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback. Static files (assets) are matched before redirects, so this only
+# catches unknown paths.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 # Vite emits content-hashed asset filenames, so they are safe to cache forever.
 [[headers]]

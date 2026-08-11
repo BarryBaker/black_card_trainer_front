@@ -14,36 +14,23 @@ if you need a different setup.
 
 ## Deploying to Netlify
 
-Netlify builds this as a static site — there is no Docker involved on this side.
-`netlify.toml` already sets the build command (`npm run build`), publish
-directory (`dist`) and Node version, so connecting the GitHub repo is enough.
+Netlify builds this as a static site — no Docker on this side. Everything is in
+`netlify.toml`: build command, publish directory, Node version, and the API
+proxy. Connect the GitHub repo and deploy; **there are no environment variables
+to set in the Netlify UI.**
 
-Pick one of two ways to reach the backend.
+### How the app reaches the backend
 
-### Option A — proxy through Netlify (recommended)
+`VITE_BASE_URL` is empty in `.env.production`, so the app requests
+`/api/db/...` on its own origin. `netlify.toml` then proxies `/api/*` to the
+Railway backend. The browser only ever talks to Netlify, so no CORS
+configuration is needed on the backend and deploy previews work unchanged.
 
-Set one build environment variable in **Site configuration → Environment variables**:
-
-| Variable           | Value                                  |
-| ------------------ | -------------------------------------- |
-| `API_PROXY_TARGET` | `https://<your-backend>.up.railway.app` |
-
-The build then writes a `/api/* → <backend>/api/:splat 200` proxy rule into
-`dist/_redirects`. The browser only ever calls the Netlify origin, so there is
-no CORS to configure and deploy previews work unchanged.
-
-### Option B — call the backend directly
-
-Set `VITE_BASE_URL` to the backend URL instead (it overrides `.env.production`).
-The backend must then allow the Netlify origin — on the backend service set:
-
-```
-CORS_ALLOWED_ORIGINS=https://<your-site>.netlify.app
-```
-
-Deploy previews get their own URLs, so each one needs adding to that list.
+To point at a different backend, edit the `to =` line in the `/api/*` redirect
+in `netlify.toml`. Rule order in that file matters — the API proxy must stay
+above the SPA catch-all, or `/api/*` gets answered with `index.html`.
 
 ### Note on env vars
 
 `VITE_*` values are inlined into the bundle at build time, not read at runtime.
-Changing one in the Netlify UI requires a redeploy to take effect.
+Changing one requires a redeploy to take effect.
