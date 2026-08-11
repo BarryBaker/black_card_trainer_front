@@ -1,0 +1,22 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Redirects are NOT declared here on purpose: netlify.toml rules are evaluated
+# before _redirects, so the SPA catch-all would shadow the /api proxy.
+# scripts/generate-redirects.mjs writes dist/_redirects in the right order.
+
+# Vite emits content-hashed asset filenames, so they are safe to cache forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# index.html points at the hashed assets, so it must always be revalidated.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
