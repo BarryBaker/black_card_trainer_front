@@ -67,8 +67,9 @@ function PokerTable({ stack, pot, pos, line, board, hero, holecards }) {
   });
 
   // Responsive table dimensions
-  const W = Math.max(300, tableWidth);
+  const W = tableWidth;
   const scale = W / BASE_W;
+  const cardScale = Math.min(0.8, (W / 360) * 0.8);
   const H = BASE_H * scale;
   const cx = W / 2,
     cy = H / 2;
@@ -152,15 +153,15 @@ function PokerTable({ stack, pot, pos, line, board, hero, holecards }) {
         }}
       >
         {boardCards.map((c, i) => (
-          <Card key={i} rank={c.rank} suit={c.suit} scale={0.8} />
+          <Card key={i} rank={c.rank} suit={c.suit} scale={cardScale} />
         ))}
         {/* Empty board slots */}
         {Array.from({ length: Math.max(0, 5 - boardCards.length) }).map((_, i) => (
           <div
             key={`empty-${i}`}
             style={{
-              width: 40,
-              height: 56,
+              width: 50 * cardScale,
+              height: 70 * cardScale,
               borderRadius: 7,
               border: '1.5px dashed rgba(255,255,255,0.12)',
               background: 'rgba(0,0,0,0.15)',
@@ -188,8 +189,8 @@ function PokerTable({ stack, pot, pos, line, board, hero, holecards }) {
           >
             <div style={{ display: 'flex' }}>
               {[0, 1, 2, 3].map((i) => (
-                <div key={i} style={{ marginLeft: i === 0 ? 0 : -24, zIndex: i }}>
-                  <Card faceDown scale={0.8} />
+                <div key={i} style={{ marginLeft: i === 0 ? 0 : -30 * cardScale, zIndex: i }}>
+                  <Card faceDown scale={cardScale} />
                 </div>
               ))}
             </div>
@@ -224,7 +225,7 @@ function PokerTable({ stack, pot, pos, line, board, hero, holecards }) {
       >
         <div style={{ display: 'flex', gap: 4 }}>
           {heroCards.map((c, i) => (
-            <Card key={i} rank={c.rank} suit={c.suit} scale={0.8} />
+            <Card key={i} rank={c.rank} suit={c.suit} scale={cardScale} />
           ))}
         </div>
         <div

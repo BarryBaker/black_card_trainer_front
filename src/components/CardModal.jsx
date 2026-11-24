@@ -38,15 +38,11 @@ const styles = {
   shell: {
     position: 'absolute',
     top: 0,
-    right: 'calc(100% + 16px)',
-    width: '85%',
-    height: '100%',
     zIndex: 30,
     pointerEvents: 'none',
   },
   panel: {
     width: '100%',
-    height: '100%',
     display: 'flex',
     flexDirection: 'column',
     borderRadius: '22px',
@@ -145,8 +141,14 @@ function CardModal({ cardsByCombo, onClose }) {
   );
 
   return (
-    <div style={styles.shell}>
-      <div style={styles.panel} role="dialog" aria-modal="true" aria-label="Card strategies">
+    <div className="trainer-card-modal" style={styles.shell}>
+      <div
+        className="trainer-card-modal-panel"
+        style={styles.panel}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Card strategies"
+      >
         <div style={styles.header}>
           <div style={styles.titleWrap}>
             <p style={styles.eyebrow}>Specific Combos</p>
@@ -161,7 +163,7 @@ function CardModal({ cardsByCombo, onClose }) {
             <p style={styles.empty}>No combo strategy data for this node.</p>
           ) : (
             entries.map(([combo, actions]) => (
-              <div key={combo} style={styles.row}>
+              <div key={combo} className="trainer-card-modal-row" style={styles.row}>
                 <div style={styles.cards}>
                   {parseCards(combo).map((card, index) => (
                     <Card key={`${combo}-${index}`} rank={card.rank} suit={card.suit} scale={0.5} />

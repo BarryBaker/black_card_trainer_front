@@ -304,9 +304,7 @@ function App() {
     <div className="app-shell">
       {activeView === 'filters' && (
         <header className="hero-panel">
-          <p className="eyebrow" style={{ paddingTop: '20px' }}>
-            Pot-Limit Omaha GTO Trainer
-          </p>
+          <p className="eyebrow">Pot-Limit Omaha GTO Trainer</p>
           {/* <h1>Black Card Trainer</h1> */}
         </header>
       )}

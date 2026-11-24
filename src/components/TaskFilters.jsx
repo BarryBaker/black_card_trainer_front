@@ -99,23 +99,10 @@ const fieldLabels = {
 
 const styles = {
   panel: {
-    marginTop: '28px',
-    padding: '24px',
-    width: 'fit-content',
-    minWidth: '810px',
-    maxWidth: '100%',
     border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '28px',
     background: 'rgba(7, 16, 25, 0.78)',
     backdropFilter: 'blur(18px)',
     boxShadow: '0 24px 60px rgba(0, 0, 0, 0.34)',
-  },
-  heading: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '24px',
-    flexWrap: 'wrap',
   },
   kicker: {
     margin: 0,
@@ -124,51 +111,10 @@ const styles = {
     fontSize: '0.74rem',
     color: '#ffca76',
   },
-  title: {
-    margin: '4px 0 0',
-    fontSize: 'clamp(1.8rem, 3vw, 2.8rem)',
-  },
   copy: {
     margin: 0,
     color: '#a8b5c1',
     maxWidth: '60ch',
-  },
-  grid: {
-    display: 'flex',
-    gap: '23px',
-    marginTop: '24px',
-    flexWrap: 'wrap',
-    width: 'fit-content',
-    maxWidth: '100%',
-  },
-  fieldCard: {
-    display: 'grid',
-    height: '465px',
-    width: '240px',
-    gap: '12px',
-    padding: '6px',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    borderRadius: '22px',
-    background: 'rgba(255, 255, 255, 0.04)',
-    boxSizing: 'border-box',
-    overflowY: 'auto',
-    overflowX: 'hidden',
-  },
-  fieldCardCBoard: {
-    height: '268px',
-    width: '180px',
-    justifySelf: 'start',
-  },
-  fieldCardCompact: {
-    height: '200px',
-    width: '68px',
-    justifySelf: 'start',
-  },
-  fieldCardCPos: {
-    height: 'fit-content',
-    maxHeight: '465px',
-    width: '200px',
-    justifySelf: 'start',
   },
   fieldLabel: {
     fontSize: '0.92rem',
@@ -180,19 +126,9 @@ const styles = {
     justifyContent: 'space-between',
     gap: '12px',
   },
-  optionGroup: {
-    display: 'grid',
-    gap: '8px',
-    gridAutoRows: '40px',
-  },
   positionGroup: {
     display: 'grid',
     gap: '10px',
-  },
-  positionScenario: {
-    display: 'grid',
-    gap: '8px',
-    gridAutoRows: '40px',
   },
   optionBtn: {
     width: '100%',
@@ -250,7 +186,6 @@ const styles = {
     color: '#d7e0e8',
   },
   primaryAction: {
-    padding: '11px 18px',
     border: '1px solid rgba(86, 210, 240, 0.42)',
     borderRadius: '10px',
     cursor: 'pointer',
@@ -368,13 +303,14 @@ function TaskFilters({
 
   return (
     <section className="page-panel page-panel-filters" style={styles.panel}>
-      <div style={styles.heading}>
+      <div className="task-filters-heading">
         <div>
           <p style={styles.kicker}>Scenario Setup</p>
-          <h2 style={styles.title}>Build a training spot</h2>
+          <h2>Build a training spot</h2>
         </div>
 
         <button
+          className="task-filters-generate"
           type="button"
           style={{
             ...styles.primaryAction,
@@ -395,12 +331,12 @@ function TaskFilters({
         </button>
       </div>
 
-      <div style={styles.grid}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexWrap: 'wrap' }}>
+      <div className="task-filters-grid">
+        <div className="task-filters-group">
           {Object.entries(fieldOptions).map(([field, options]) => (
-            <label key={field} style={{ ...styles.fieldCard, ...styles.fieldCardCompact }}>
+            <label key={field} className="task-filters-card task-filters-compact-card">
               <span style={styles.fieldLabel}>{fieldLabels[field]}</span>
-              <div style={styles.optionGroup}>
+              <div className="task-filters-options">
                 {options.map((option) => (
                   <button
                     key={option}
@@ -432,14 +368,14 @@ function TaskFilters({
             </label>
           ))}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexWrap: 'wrap' }}>
+        <div className="task-filters-group">
           {Object.entries(boardOptions).map(([boardStreet, pairs]) => (
-            <div key={boardStreet} style={{ ...styles.fieldCard, ...styles.fieldCardCBoard }}>
+            <div key={boardStreet} className="task-filters-card task-filters-board-card">
               <span style={styles.fieldLabel}>{boardStreet} Board</span>
               {pairs.map(([key, selectedLabel, notSelectedLabel]) => {
                 const val = board[key];
                 return (
-                  <div key={key} style={{ ...styles.optionGroup, gridTemplateColumns: '1fr 1fr' }}>
+                  <div key={key} className="task-filters-options task-filters-board-options">
                     <button
                       type="button"
                       style={{
@@ -467,7 +403,7 @@ function TaskFilters({
           ))}
         </div>
         {/* <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', flexWrap: 'wrap' }}> */}
-        <label style={{ ...styles.fieldCard, ...styles.fieldCardCPos }}>
+        <label className="task-filters-card task-filters-positions">
           <span style={styles.fieldLabel}>Positions</span>
           <div style={styles.positionGroup}>
             {positionOptions.length === 0 ? (
@@ -478,8 +414,8 @@ function TaskFilters({
               positionOptions.map((scenario) => (
                 <div
                   key={scenario.join('_')}
+                  className="task-filters-options"
                   style={{
-                    ...styles.positionScenario,
                     gridTemplateColumns: `repeat(${scenario.length}, minmax(0, 1fr))`,
                   }}
                 >
@@ -502,7 +438,7 @@ function TaskFilters({
           </div>
         </label>
 
-        <label style={styles.fieldCard}>
+        <label className="task-filters-card">
           <div style={styles.fieldHeader}>
             <span style={styles.fieldLabel}>Lines</span>
             <div style={styles.iconActions}>
@@ -526,7 +462,7 @@ function TaskFilters({
               </button>
             </div>
           </div>
-          <div style={styles.optionGroup}>
+          <div className="task-filters-options">
             {linesOptions.length === 0 ? (
               <span style={{ fontSize: '0.72rem', color: '#5a6a78' }}>No lines available</span>
             ) : (

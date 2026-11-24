@@ -10,8 +10,6 @@ import { sortActions } from '../utils/actionSorting';
 
 const styles = {
   panel: {
-    width: '820px',
-    height: '100vh',
     marginLeft: 'auto',
     marginRight: 'auto',
     padding: '12px',
@@ -67,34 +65,12 @@ const styles = {
     cursor: 'not-allowed',
     boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.06)',
   },
-  splitRow: {
-    display: 'flex',
-    position: 'relative',
-    gap: '16px',
-    alignItems: 'stretch',
-    flex: 1,
-    minHeight: 0,
-  },
   score: {
     display: 'flex',
     flexDirection: 'column',
     gap: '6px',
     marginBottom: '12px',
     alignItems: 'center',
-  },
-  left: {
-    flex: 10,
-    minWidth: 0,
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  right: {
-    position: 'relative',
-    flex: 8,
-    minWidth: 0,
-    minHeight: 0,
-    display: 'flex',
-    flexDirection: 'column',
   },
   splitPaneTreeWrap: {
     position: 'relative',
@@ -104,7 +80,6 @@ const styles = {
   },
   splitPaneTree: {
     width: '100%',
-    height: '100%',
     overflowY: 'auto',
     overflowX: 'auto',
     background: 'rgba(255, 255, 255, 0.03)',
@@ -126,8 +101,6 @@ const styles = {
     color: 'rgba(255, 255, 255, 0.62)',
   },
   treeToggleLabel: {
-    position: 'absolute',
-    left: 0,
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
@@ -183,8 +156,8 @@ function TrainerView({
 
   return (
     <section className="page-panel page-panel-trainer" style={styles.panel}>
-      <div style={styles.splitRow}>
-        <div style={styles.left}>
+      <div className="trainer-split">
+        <div className="trainer-play">
           <div style={styles.score}>
             <div
               style={{
@@ -235,10 +208,10 @@ function TrainerView({
           </div>
           <SessionTaskHistory taskPayloads={sessionTaskPayloads} onTaskClick={onSessionTaskClick} />
         </div>
-        <div style={styles.right}>
+        <div className="trainer-analysis">
           {previousActions ? (
             <div style={styles.previousNodeWrap}>
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexDirection: 'row' }}>
+              <div className="trainer-previous-result">
                 <ActionCapsule actions={previousActions} shouldNormalize={false} />
 
                 <span> {previousAnswer}</span>
@@ -266,7 +239,7 @@ function TrainerView({
                   <Card key={i} rank={c.rank} suit={c.suit} scale={0.65} />
                 ))}
               </div>
-              <span>Line: {prevTaskPayload?.line}</span>
+              <span className="trainer-previous-line">Line: {prevTaskPayload?.line}</span>
             </div>
           ) : null}
           <div style={styles.splitPaneTreeWrap}>
@@ -282,19 +255,9 @@ function TrainerView({
                 onClose={() => setSelectedNodeCards(null)}
               />
             ) : null}
-            <div style={styles.splitPaneTree}>
-              <div
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  position: 'relative',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  paddingBottom: '12px',
-                  height: '32px',
-                }}
-              >
-                <label style={styles.treeToggleLabel}>
+            <div className="trainer-tree" style={styles.splitPaneTree}>
+              <div className="trainer-tree-header">
+                <label className="trainer-tree-toggle" style={styles.treeToggleLabel}>
                   <input
                     type="checkbox"
                     checked={showCurrent}

@@ -10,8 +10,6 @@ const styles = {
     gap: '2px',
     overflowY: 'auto',
     scrollbarGutter: 'stable',
-    flex: 1,
-    minHeight: '200px',
   },
   row: {
     width: '100%',
@@ -60,7 +58,7 @@ function SessionTaskHistory({ taskPayloads, onTaskClick }) {
   }
 
   return (
-    <div style={styles.wrap}>
+    <div className="trainer-history" style={styles.wrap}>
       {[...taskPayloads].reverse().map((taskPayload, index) => {
         const taskActions = Object.values(taskPayload?.task ?? {})[0] ?? null;
         const holecards = Object.keys(taskPayload?.task ?? {})[0] ?? '';
@@ -68,6 +66,7 @@ function SessionTaskHistory({ taskPayloads, onTaskClick }) {
         return (
           <button
             key={`${taskPayload?.id ?? 'task'}-${index}`}
+            className="trainer-history-row"
             type="button"
             style={styles.row}
             onClick={() => onTaskClick(taskPayload)}
