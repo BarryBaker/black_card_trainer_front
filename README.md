@@ -23,8 +23,8 @@ to set in the Netlify UI.**
 
 `VITE_BASE_URL` is empty in `.env.production`, so the app requests
 `/api/db/...` on its own origin. `netlify.toml` then proxies `/api/*` to the
-Railway backend. The browser only ever talks to Netlify, so no CORS
-configuration is needed on the backend and deploy previews work unchanged.
+VPS backend at `https://trainer.85-190-101-59.sslip.io`. The browser sends
+requests to Netlify on the same origin, including in deploy previews.
 
 To point at a different backend, edit the `to =` line in the `/api/*` redirect
 in `netlify.toml`. Rule order in that file matters — the API proxy must stay
