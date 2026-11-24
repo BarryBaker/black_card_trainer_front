@@ -4,15 +4,13 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  VITE_BASE_URL = ""
 
-# Order matters: rules are evaluated top to bottom, so the API proxy has to come
-# before the SPA catch-all or /api/* would be answered with index.html.
-
-# Proxies API calls to the Railway backend. Because the browser only ever talks
-# to the Netlify origin, there is no CORS to configure on the backend.
+# Match API requests before the fallback to index.html.
+# Netlify forwards the browser's same-origin requests to the VPS.
 [[redirects]]
   from = "/api/*"
-  to = "https://blackcardtrainerback-production.up.railway.app/api/:splat"
+  to = "https://trainer.85-190-101-59.sslip.io/api/:splat"
   status = 200
   force = true
 
