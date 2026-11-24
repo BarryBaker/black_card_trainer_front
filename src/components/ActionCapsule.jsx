@@ -3,8 +3,6 @@ import { sortActions } from '../utils/actionSorting';
 const styles = {
   capsule: {
     position: 'relative',
-    width: '120px',
-    minWidth: '120px',
     height: '20px',
     borderRadius: '10px',
     overflow: 'hidden',
@@ -97,7 +95,7 @@ function ActionCapsule({ actions, label = '', shouldNormalize = true }) {
   // console.log('Rendering ActionCapsule with actions:', actions, 'normalized segments:', segments);
 
   return (
-    <div style={styles.capsule}>
+    <div className="action-capsule" style={styles.capsule}>
       {segments.map((segment, index) => (
         <div
           key={`${segment.action}-${index}`}

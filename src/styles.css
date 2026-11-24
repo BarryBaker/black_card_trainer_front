@@ -98,6 +98,21 @@
   min-height: 200px;
 }
 
+.trainer-history-row {
+  flex-wrap: nowrap;
+  gap: clamp(3px, 1.25%, 10px);
+}
+
+.action-capsule {
+  width: 120px;
+  min-width: 120px;
+}
+
+.trainer-history-row > .action-capsule {
+  width: min(120px, 30%);
+  min-width: 18px;
+}
+
 .trainer-previous-result {
   display: flex;
   align-items: center;
@@ -449,7 +464,6 @@ pre {
     max-height: 200px;
   }
 
-  .trainer-history-row,
   .trainer-previous-result,
   .trainer-card-modal-row {
     flex-wrap: wrap;
