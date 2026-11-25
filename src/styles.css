@@ -138,6 +138,25 @@
   left: 0;
 }
 
+.tree-node-control {
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+}
+
+.tree-node-card-list:enabled:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.tree-node-control:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .trainer-card-modal {
   right: calc(100% + 16px);
   width: 85%;

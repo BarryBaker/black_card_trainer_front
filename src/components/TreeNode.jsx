@@ -43,7 +43,7 @@ const styles = {
     width: '40px',
     // fontStyle: 'italic',
   },
-  expandToggle: {
+  trailingControl: {
     width: '20px',
     display: 'flex',
     justifyContent: 'center',
@@ -69,38 +69,68 @@ function TreeNode({ node, onClick, onMassClick, hasTaskHand, showSubtree }) {
   const hasChildren = Array.isArray(node?.subtree) && node.subtree.length > 0;
   const hasCards =
     node?.cards && typeof node.cards === 'object' && Object.keys(node.cards).length > 0;
+  const handleToggle = hasChildren ? onClick : undefined;
+  const toggleCursor = handleToggle ? 'pointer' : 'default';
+  const handleMassClick = hasCards ? onMassClick : undefined;
 
   return (
     safeIndentation === 0 && (
-      <div style={{ ...styles.row, cursor: onClick ? 'pointer' : 'default' }}>
+      <div style={styles.row}>
         {/* {Array.from({ length: safeIndentation }).map((_, i) => (
           <div
             key={i}
             style={i === 0 ? { ...styles.indent, ...styles.firstIndent } : styles.indent}
           />
         ))} */}
-        <div onClick={onClick}>
+        <div style={{ cursor: toggleCursor }} onClick={handleToggle}>
           <ActionCapsule actions={node?.action} label={safeBestFeature} />
         </div>
-        <div
-          style={{ ...styles.mass, cursor: hasCards ? 'pointer' : 'default' }}
-          onClick={hasCards ? onMassClick : undefined}
-        >
+        <div style={{ ...styles.mass, cursor: toggleCursor }} onClick={handleToggle}>
           {typeof node.mass === 'number' ? (node.mass * 100).toFixed(1) + '%' : ''}
         </div>
-        {hasChildren && (
-          <div
-            style={styles.expandToggle}
+        {hasChildren ? (
+          <button
+            type="button"
+            className="tree-node-control"
+            style={styles.trailingControl}
             title={showSubtree ? 'Collapse' : 'Expand'}
             aria-label={showSubtree ? 'Collapse subtree' : 'Expand subtree'}
+            aria-expanded={Boolean(showSubtree)}
+            onClick={handleToggle}
+            disabled={!handleToggle}
           >
-            <div
+            <span
+              aria-hidden="true"
               style={{
                 ...styles.expandCaret,
                 transform: showSubtree ? 'rotate(90deg)' : 'rotate(0deg)',
               }}
             />
-          </div>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="tree-node-control tree-node-card-list"
+            style={styles.trailingControl}
+            title={handleMassClick ? 'Show cards' : 'No cards available'}
+            aria-label="Show cards"
+            onClick={handleMassClick}
+            disabled={!handleMassClick}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="1.5" width="10" height="13" rx="1.5" />
+              <path d="M5.5 5h5m-5 3h5m-5 3H9" />
+            </svg>
+          </button>
         )}
         <div style={styles.signalWrap}>
           {((isTaskHand && !hasChildren) || (hasTaskHand && !showSubtree)) && (
